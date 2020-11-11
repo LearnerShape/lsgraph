@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+    lsgraph:
+        build: ./
+        expose:
+          - "5000"
+        ports:
+          - "5000:5000"
+        volumes:
+          - "./:/app/app"
+        env_file: .env
+        working_dir: /app/app
+        command: gunicorn -b 0.0.0.0:5000 --reload application:app
+        links:
+          - lsdatabase
+
+    lsdatabase:
+        image: postgres:9.6
+        volumes:
+          - lsdb_data:/var/lib/postgresql
+        expose:
+          - "5432"
+
+
+volumes:
+    lsdb_data:
+        driver: local

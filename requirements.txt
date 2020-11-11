@@ -1,0 +1,8 @@
+flask
+sqlalchemy
+psycopg2
+numpy
+python-dateutil
+pytz
+bs4
+gunicorn

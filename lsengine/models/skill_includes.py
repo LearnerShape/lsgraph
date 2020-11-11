@@ -1,0 +1,36 @@
+# Copyright (C) 2019-2020  Learnershape and contributors
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+from sqlalchemy import func,  Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy.orm import relationship
+
+from . import Base
+
+
+class SkillIncludes(Base):
+  __tablename__ = 'skill_includes'
+  id = Column(Integer, primary_key = True)
+  subject_id = Column(Integer, ForeignKey('skills.id'))
+  object_id = Column(Integer, ForeignKey('skills.id'))
+  # subject = relationship('Skill', backref="skills_s",
+  #   primaryjoin = subject_id==Skill.id)
+  # object = relationship('Skill', backref='skills_o',
+  #   primaryjoin = object_id==Skill.id)
+  created_at = Column(DateTime, nullable=False, server_default=func.now())
+  modified_at = Column(DateTime, nullable=False, server_default=func.now(), server_onupdate=func.now())
+  tag = Column(Text)
+  user_id = Column(Integer)
+  stage = Column(String)
+
