@@ -379,6 +379,7 @@ class PathwayService:
                         continue
                     if min_c_duration > d:
                         continue
+                    course_out['duration'] = course_out['duration']*60*60*24*7
                 elif course_out['duration_code'] == 'S':
                     if max_c_duration < course_out['duration']:
                         continue
