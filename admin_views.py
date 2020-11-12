@@ -16,17 +16,19 @@
 from flask import abort, Blueprint, jsonify, request
 import psycopg2 as pg
 
+
+admin = Blueprint('admin', __name__)
+
+
 from application import db_url, app
+db_conn = pg.connect(db_url)
+
 from admin.graph import get_graphs, create_graph, get_graph_detail
 from admin.organisation import (get_organisations,
                                 create_organisation,
                                 get_organisation_detail)
 from admin.user import get_users, create_user, get_user_detail
 from admin.profile import get_profiles, create_profile, get_profile_detail
-
-admin = Blueprint('admin', __name__)
-
-db_conn = pg.connect(db_url)
 
 
 
