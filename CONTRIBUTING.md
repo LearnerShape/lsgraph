@@ -87,7 +87,7 @@ Areas of the codebase that do not have thorough tests can be found by generating
 
 # Code of conduct
 
-We hope to build a welcoming and friendly community around this project. Everyone is invited to participate. Unethical and unprofessional behaviour will not be tolerated. We have adopted the Contributor Covenant to support this aim. Any issues can be reported to jonathan@learnershape.com or maury@learnershape.com.
+We hope to build a welcoming and friendly community around this project. Everyone is invited to participate. Unethical and unprofessional behaviour will not be tolerated. We have adopted the [Contributor Covenant](https://github.com/LearnerShape/lsgraph/blob/main/CODE_OF_CONDUCT.md) to support this aim. Any issues can be reported to jonathan@learnershape.com or maury@learnershape.com.
 
 
 
