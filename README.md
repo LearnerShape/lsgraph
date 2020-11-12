@@ -39,8 +39,13 @@ The service is then available at http://localhost:5000/
 
 Notebooks for interacting with the service are available in the notebooks directory.
 
+* [Setting up graphs, organisations, profiles, and users](https://github.com/LearnerShape/lsgraph/blob/main/notebooks/setup.ipynb)
+* [Job recommendation]()
+* [Workforce planning]()
+* [Course recommendation]()
+
 
 # Contributing
 
-For guidance on reporting issues, suggesting new features and contributing to project development, see the contributing guidelines.
+For guidance on reporting issues, suggesting new features and contributing to project development, see the [contributing guidelines](https://github.com/LearnerShape/lsgraph/blob/main/CONTRIBUTING.md).
 
