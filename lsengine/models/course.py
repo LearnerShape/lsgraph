@@ -23,7 +23,6 @@ from . import Base
 class Course(Base):
   __tablename__ = 'courses'
   id = Column(Integer, primary_key = True)
-  excel_id = Column(Integer)
   name = Column(String)
   certificate = Column(String)
   type = Column(String)

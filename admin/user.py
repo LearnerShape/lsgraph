@@ -74,6 +74,8 @@ def get_user_detail(db_conn, user_id):
     cursor = db_conn.cursor()
     cursor.execute("SELECT id,email,name,default_graph,created_at,updated_at FROM users WHERE id = %s",
                    [user_id,])
-    org_detail = cursor.fetchone()
-    org_detail = {k.name:v for k,v in zip(cursor.description, org_detail)}
-    return org_detail
+    user_detail = cursor.fetchone()
+    user_detail = {k.name:v for k,v in zip(cursor.description, user_detail)}
+    cursor.execute("SELECT id FROM profiles WHERE user_id = %s AND kind IS NULL", [user_id,])
+    user_detail["profile_id"] = cursor.fetchone()[0]
+    return user_detail
