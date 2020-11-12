@@ -379,11 +379,13 @@ class PathwayService:
                         continue
                     if min_c_duration > d:
                         continue
+                    course_out['duration_in_seconds'] = course_out['duration']*60*60*24*7
                 elif course_out['duration_code'] == 'S':
                     if max_c_duration < course_out['duration']:
                         continue
                     if min_c_duration > course_out['duration']:
                         continue
+                    course_out['duration_in_seconds'] = course_out['duration']
                 skills[score.skill_id].append([(score.skill_id, course_out),
                                                score.score])
             session.commit()
