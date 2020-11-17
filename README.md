@@ -58,7 +58,7 @@ To crawl all providers for the test organisation created in the notebooks:
 
 `python ls.py --config=cli/config.json --env=testing crawl --organisation Test`
 
-The above command can be run from the host or the docker container. The following commands connect to the database and if using the testing environment must be run from within the docker container. Alternatively, the testing-host environment can be used and the commands run from the host.
+The above command can be run from the host or the docker container. The following commands connect to the database and if using the testing environment must be run from within the docker container. Instead, the testing-host environment is used enabling the commands to be run from the host.
 
 The courses can be scored against the skill graph:
 
