@@ -37,12 +37,38 @@ Set up initial database:
 
 The service is then available at http://localhost:5000/
 
+## Interacting with the service
+
 Notebooks for interacting with the service are available in the notebooks directory.
 
 * [Setting up graphs, organisations, profiles, and users](https://github.com/LearnerShape/lsgraph/blob/main/notebooks/setup.ipynb)
 * [Job recommendation]()
 * [Workforce planning]()
 * [Course recommendation]()
+
+## Loading courses and scoring
+
+Courses are collected from providers and scored against skills using a command line interface.
+
+A sample configuration file is included at cli/config.json for the test organisation created in the notebooks above. A crawler for [Pluralsight](https://www.pluralsight.com/) is also included.
+
+The program is structured to facilitate easily creating crawlers for other services. Common functionality is encapsulated into generic crawler classes. When creating a new crawler they inherit from the generic classes. See `cli/plugins/crawlers/pluralsight.py` for an example.
+
+To crawl all providers for the test organisation created in the notebooks:
+
+`python ls.py --config=cli/config.json --env=testing crawl --organisation Test`
+
+The above command can be run from the host or the docker container. The following commands connect to the database and if using the testing environment must be run from within the docker container. Alternatively, the testing-host environment can be used and the commands run from the host.
+
+The courses can be scored against the skill graph:
+
+`python ls.py --config=cli/config.json --env=testing-host classify --organisation Test --model=simple`
+
+As with crawlers, new models can also be easily created. The simple model used above can be seen at `cli/plugins/models/simple.py`.
+
+Finally, courses and scores can be loaded into the database:
+
+`python ls.py --config=cli/config.json --env=testing-host load --organisation=Test --courses --model=simple`
 
 
 # Contributing

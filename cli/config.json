@@ -1,0 +1,23 @@
+{"environments":{
+    "production":{
+        "db":"REPLACE WITH DB URI",
+        "results_dir":"datastore",
+        "organisations":{
+            "Test":{
+                "providers":["pluralsight"],
+                "model":"",
+                "graph":"test"
+            }
+        }
+    },
+    "testing-host":{
+        "db":"postgres://postgres@localhost:5432/postgres",
+        "inherit_from":"production"
+    },
+    "testing":{
+        "db":"postgres://postgres@lsdatabase/postgres",
+        "inherit_from":"production"
+    }
+ },
+ "plugin_directory":[]
+}
