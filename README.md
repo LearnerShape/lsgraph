@@ -9,7 +9,7 @@ lsgraph currently provides services to:
 * recommend suitable job profiles based on current skills
 * suggest reskilling options for target jobs across a workforce. 
 
-This project was released by [LearnerShape](www.learnershape.com), which uses these services to provide reskilling and upskilling services through a user-facing website.
+This project was released by [LearnerShape](https://www.learnershape.com), which uses these services to provide reskilling and upskilling services through a user-facing website.
 
 Our approach is centred around 'skills', which is a broad term used to cover the full range of personal abilities (e.g. knowledge, competences and aptitudes). Skills are organised into a 'skills graph', which is a hierarchical directed acyclic graph associating skills in a framework. Multiple, independent 'skills graphs' can be hosted by lsgraph to support the needs of multiple organisations. As an example, the public graph used at Learnershape (and included with lsgraph) contains the top-level skill 'software engineering' that links to the skill 'languages' that links to the skill 'Python'.
 
