@@ -60,6 +60,8 @@ class LearnerShapeService:
       print(n2)
       r = merge_trees(n1,l1,n2,l2)
 
+      #set_trace()
+
       return {'nodes':r['nodes'], 'links':r['links']}
     elif method == 'graph':
       nodes = []

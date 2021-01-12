@@ -39,7 +39,7 @@ class RobustCache:
     def __getitem__(self, key):
         if key not in self.cache:
             # Query database for value
-            value = self.query_func(key)
+            value = self._query_item(key)
             self.cache[key] = value
         return self.cache[key]
 
@@ -58,6 +58,20 @@ class RobustCache:
 
     def values(self):
         return self.cache.values()
+
+
+    def _query_item(self, key, error=0):
+        try:
+            return self.query_func(key)
+        except:
+            self.session.rollback()
+            error += 1
+            if error < 3:
+                return self._query_item(key, error)
+            raise
+        finally:
+            self.session.close()
+
 
 
 
@@ -167,6 +181,7 @@ class Graph:
                                                      'path_from_root',
                                                      'description'])
     self.skills = RobustCache(query_func = skill_func)
+    self.skills.session = session
     for s in skills:
 
       self.skills[s.id] = {'name':s.name,
