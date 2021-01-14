@@ -29,10 +29,10 @@ def profile_skill_ids(cursor,p):
   return results
 
 
-def profile_skill_ids_focussed(cursor,p):
-  q = f"""SELECT user_id FROM profiles WHERE id = {p}"""
-  cursor.execute(q)
-  user_id = get_ids(cursor,q)[0]
+def profile_skill_ids_focussed(cursor, user_id):
+  # q = f"""SELECT user_id FROM profiles WHERE id = {p}"""
+  # cursor.execute(q)
+  # user_id = get_ids(cursor,q)[0]
 
   q = f"""SELECT competences.skill_id FROM 
   competences INNER JOIN skills 
@@ -73,7 +73,8 @@ def profile_skill_levels_batch(cursor, profile_ids):
 
 def organisation_employee_profiles(cursor, organisation_id):
   """Fetch all employee profile IDs for an organisation"""
-  q = """SELECT profiles.user_id, profiles.id FROM profiles, members WHERE profiles.user_id = members.user_id AND members.organisation_id = %s AND profiles.kind IS NULL"""
+  q = """SELECT profiles.user_id, profiles.id FROM profiles, members WHERE profiles.user_id = members.user_id AND members.organisation_id = %s AND
+  (profiles.kind IS NULL OR profiles.kind = 'source')"""
   cursor.execute(q, [organisation_id])
   results = [{"user_id":i[0], "profile_id":i[1]} for i in cursor.fetchall()]
   return results
@@ -81,7 +82,7 @@ def organisation_employee_profiles(cursor, organisation_id):
 
 def get_employee_profiles(cursor, employee_ids):
   """Fetch all employee profile IDs for a list of user IDs"""
-  q = """SELECT profiles.user_id, profiles.id FROM profiles WHERE profiles.user_id = ANY(%s) AND profiles.kind IS NULL"""
+  q = """SELECT profiles.user_id, profiles.id FROM profiles WHERE profiles.user_id = ANY(%s) AND (profiles.kind IS NULL OR profiles.kind = 'source')"""
   cursor.execute(q, [employee_ids])
   results = [{"user_id":i[0], "profile_id":i[1]} for i in cursor.fetchall()]
   return results

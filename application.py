@@ -60,6 +60,8 @@ print('Start')
 def before_request_func():
   if request.path == '/test':
     return
+  if request.path == '/':
+    return
   D = request.json
   api_auth = os.environ["ENABLE_API_AUTH"].lower() == 'true'
   PUBLIC_KEY = os.environ.get("API_PUBLIC_KEY", None)
@@ -73,7 +75,19 @@ def before_request_func():
   if SECRET_KEY != D['SECRET_KEY']:
     abort(403)
 
+def load_graphs(G):
+  conn = pg.connect(db_url)
+  cur = conn.cursor()
 
+
+  cur.execute('SELECT root_id, graph_tag FROM graphs')
+  ids = cur.fetchall()
+  for root_id, tag in ids:
+    graph = Graph()
+    graph.root_id = root_id
+    graph.load_data_restricted(db_url, 0, tag)
+    G.add(tag, graph)
+  conn.close()
 
 class G:
   g = {}
@@ -99,20 +113,14 @@ class G:
 
 # Add graphs
 
-conn = pg.connect(db_url)
-cur = conn.cursor()
 
-cur.execute('SELECT root_id, graph_tag FROM graphs')
-ids = cur.fetchall()
-for root_id, tag in ids:
-  graph = Graph()
-  graph.root_id = root_id
-  graph.load_data_restricted(db_url, 0, tag)
-  G.add(tag, graph)
+load_graphs(G)
 
-conn.close()
+
 
 print('Ready.')
+
+
 
 
 
@@ -158,11 +166,13 @@ def hello_world():
 def reload():
   D = request.json
 
-  if D and 'graph_tag' in D:
-    G.get(D).load_data(db_url)
-  else:
-    for g in G.get_all():
-      g.load_data(db_url)
+  # if D and 'graph_tag' in D:
+  #   G.get(D).load_data(db_url)
+  # else:
+  #   for g in G.get_all():
+  #     g.load_data(db_url)
+
+  load_graphs(G)
   return jsonify({'status': 'OK'})
 
 
@@ -344,11 +354,22 @@ def get_learnershape():
   D = request.json
 
   p1 = int(D['p1'])
-  p2 = int(D['p2'])
+  p2 = D['p2']
+
+  if p2 is not None:
+    p2 = int(p2)
+
+  user_id = int(D['user_id'])
+
   if 'focus_toggle' in D:
     focus_toggle = D['focus_toggle']
   else:
     focus_toggle = False
+
+  if 'hide_source' in D:
+    hide_source = D['hide_source']
+  else:
+    hide_source = False
 
   # set_trace()
 
@@ -364,11 +385,14 @@ def get_learnershape():
   cursor =conn.cursor()
 
   if focus_toggle:
-    ids1 = profile_skill_ids_focussed(cursor,p1)
-    ids2 = profile_skill_ids_focussed(cursor,p2)
+    ids1 = profile_skill_ids_focussed(cursor,user_id)
+    ids2 = profile_skill_ids_focussed(cursor,user_id)
   else:
     ids1 = profile_skill_ids(cursor,p1)
     ids2 = profile_skill_ids(cursor,p2)
+
+    if hide_source:
+      ids1 = []
   # Take out the non-focussed skills here
 
 

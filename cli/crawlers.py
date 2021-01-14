@@ -102,9 +102,12 @@ class GenericCrawl:
             self.fn = "{0}.zip".format(identifier)
             self.identifier = identifier
             with ZipFile(os.path.join(self.results_dir, self.fn)) as z:
-                with z.open('index.json') as fp:
-                    idx = json.loads(fp.read())
-                    self.idx = idx
+                if "index.json" in z.namelist():
+                    with z.open('index.json') as fp:
+                        idx = json.loads(fp.read())
+                        self.idx = idx
+                else:
+                    self._build_index()
         else:
             dt = datetime.now().strftime("%Y%m%d%H%M%S")
             identifier = "{0}{1}".format(self.crawler.prefix, dt)
@@ -124,6 +127,20 @@ class GenericCrawl:
                     continue
                 identifier, fn = c.save(z)
                 idx[identifier] = fn
+            with z.open('index.json', 'w') as fp:
+                fp.write(json.dumps(idx).encode('utf-8'))
+        self.idx = idx
+
+
+    def _build_index(self):
+        idx = {}
+        with ZipFile(os.path.join(self.results_dir, self.fn), 'a') as z:
+            files = z.namelist()
+            for f in files:
+                if f == "index.json":
+                    continue
+                course = self.get_course(f)
+                idx[course.identifier] = f
             with z.open('index.json', 'w') as fp:
                 fp.write(json.dumps(idx).encode('utf-8'))
         self.idx = idx

@@ -374,7 +374,7 @@ class PathwayService:
                         continue
                     if course_out['weekly_effort'] > max_weekly_effort:
                         continue
-                    d = 60*60*course_out['duration'] * course_out['weekly_effort']
+                    d = 60*60*24*7*course_out['duration']
                     if max_c_duration < d:
                         continue
                     if min_c_duration > d:
