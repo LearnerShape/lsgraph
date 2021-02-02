@@ -67,10 +67,6 @@ def load_courses(organisation, provider, crawl, clean):
         if force or (len(batch) > batch_size):
             execute_batch(db, q, batch)
             Config.db_conn.commit()
-            with open('course_update4.sql', 'a') as fp:
-                for b in batch:
-                    fp.write(db.mogrify(q, b).decode('utf-8'))
-                    fp.write('\n')
             batch = []
         return batch
     load_time = 0
@@ -127,7 +123,7 @@ def load_scores_from_results(organisation, results):
     for skill_path in skills.keys():
         skill_id = skills[skill_path]
         # Delete old scores
-        db.execute('DELETE FROM course_scores WHERE skill_id = %s',
+        db.execute("DELETE FROM course_scores WHERE skill_id = %s AND score_type NOT LIKE 'level:%%'",
                    [skill_id,])
         # Load new scores
         courses_loaded = 0
@@ -148,6 +144,30 @@ def load_scores_from_results(organisation, results):
                 course_id = existing_courses[course.lower()]
                 load_score(db, skill_id, course_id, score/2)
                 courses_loaded += 1
+        Config.db_conn.commit()
+
+
+def load_levels_from_results(organisation, results):
+    """Load manually reviewed predicted level scores"""
+    db = Config.get_db_cursor()
+    existing_courses = get_courses(db)
+    skills = get_skill_map(db, organisation)
+
+    with open(results) as fp:
+        good_course_scores = json.load(fp)
+
+    for skill_path in skills.keys():
+        skill_id = skills[skill_path]
+        # Delete old scores
+        db.execute("DELETE FROM course_scores WHERE skill_id = %s AND score_type LIKE 'level:%%'",
+                   [skill_id,])
+        # Load new scores
+        course_scores = good_course_scores.get(skill_path, {})
+        for course, score in course_scores.items():
+            if course.lower() not in existing_courses:
+                continue
+            course_id = existing_courses[course.lower()]
+            load_score(db, skill_id, course_id, score, "level:manual")
         Config.db_conn.commit()
 
 
@@ -220,7 +240,7 @@ def get_child_paths(skills):
     return child_paths
 
 
-def load_score(db, skill_id, course_id, score):
+def load_score(db, skill_id, course_id, score, score_type="simple_avg"):
     q = """INSERT INTO course_scores (course_id, skill_id,
             score, score_type, created_at, updated_at)
             VALUES (%(course_id)s, %(skill_id)s, %(score)s,
@@ -228,7 +248,7 @@ def load_score(db, skill_id, course_id, score):
     vars = {'skill_id':skill_id,
             'course_id':course_id,
             'score':score,
-            'score_type':'simple_avg',
+            'score_type':score_type,
             'created_at':datetime.now(),
             'updated_at':datetime.now()}
     db.execute(q, vars)

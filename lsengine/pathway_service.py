@@ -241,27 +241,108 @@ class PathwayService:
         return to_return
 
 
-    def courses_for_skill(self,skill_ids,n_courses=10,
+    def _get_scores(self, skill_ids, top_n=20):
+        """Get all scores for a set of skill IDs"""
+        session = self.graph.Session()
+        relevance = {i:[] for i in skill_ids}
+        level = {i:[] for i in skill_ids}
+        courses = []
+        try:
+            query = session.query(CourseScore). \
+                filter(CourseScore.course_id == Course.id). \
+                filter(CourseScore.skill_id.in_(skill_ids))
+            type_whitelist = self.constraints['sources']['type']['whitelist']
+            if type_whitelist != []:
+                query = query.filter(Course.type.in_(type_whitelist))
+            for score in query:
+                if score.score_type.startswith("level:"):
+                    level[score.skill_id].append((score.course_id,
+                                                  score.score))
+                else:
+                    relevance[score.skill_id].append((score.course_id,
+                                                      score.score))
+                courses.append(score.course_id)
+        except:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+        return relevance, level, set(courses)
+
+
+    def _filter_by_constraints(self, scores):
+        """Remove courses that do not match constraints"""
+        output = {}
+        for s_id, courses in scores.items():
+            output[s_id] = [(c_id,s) for c_id,s in courses if
+                            self._constraint_accept(c_id)]
+        return output
+
+
+    def _constraint_accept(self, course_id):
+        """Check whether a course meets the constraints set"""
+        self._get_courses([course_id])
+        c = self.courses[course_id]
+        max_duration_weeks = self.constraints['time']['maximum_duration']
+        max_weekly_effort = self.constraints['time']['maximum_weekly_effort']
+        min_c_duration = self.constraints['time']['minimum_course_duration']
+        max_c_duration = self.constraints['time']['maximum_course_duration']
+        if c['duration_code'] == 'W':
+            if c['duration'] > max_duration_weeks:
+                return False
+            if c['weekly_effort'] > max_weekly_effort:
+                return False
+            d = 60*60*24*7*c['duration']
+            if max_c_duration < d:
+                return False
+            if min_c_duration > d:
+                return False
+        elif c['duration_code'] == 'S':
+            if max_c_duration < c['duration']:
+                return False
+            if min_c_duration > c['duration']:
+                return False
+        return True
+
+
+    def courses_for_skill(self, skill_ids, user=None,
+                          n_courses=10,
                           n_courses_per_skill=10):
-        """Return courses for a selected skill"""
-        skills = self._get_scores_for_skills(skill_ids)
-        for k in skills.keys():
-            skills[k].sort(key=lambda x:x[1], reverse=True)
-        to_return = []
-        for n,i in enumerate(zip(*skills.values())):
-            if n >= n_courses_per_skill:
+        """Return courses for a select skill prioritizing suitable levels"""
+        relevance, level, course_ids = self._get_scores(skill_ids)
+        courses = self._get_courses(course_ids)
+        relevance = self._filter_by_constraints(relevance)
+        results = {i:[] for i in skill_ids}
+        for s_id in skill_ids:
+            r_scores = dict(relevance[s_id])
+            sl = level[s_id]
+            sl.sort(key=lambda x:x[1]+r_scores[x[0]], reverse=True)
+            for sl_id,_ in sl:
+                if len(results[s_id]) >= n_courses_per_skill:
+                    continue
+                if sl_id not in results[s_id]:
+                    results[s_id].append(sl_id)
+            sr = relevance[s_id]
+            sr.sort(key=lambda x:x[1], reverse=True)
+            for sr_id,_ in sr:
+                if len(results[s_id]) >= n_courses_per_skill:
+                    continue
+                if sr_id not in results[s_id]:
+                    results[s_id].append(sr_id)
+        max_courses = max([len(i) for i in results.values()])
+        output = []
+        for i in range(max_courses):
+            if len(output) >= n_courses:
                 continue
-            # Interleave the next best courses for each skill
-            # i.e. for skills A and B, return A2, B2, A3, B3, etc
-            for j in i:
-                new_course = j[0][1]
-                skills = [{"id":j[0][0],
-                           "name":self.graph.skills[j[0][0]]["name"]}]
-                new_course['skills'] = skills
-                to_return.append(new_course)
-                if len(to_return) >= n_courses:
-                    return {'courses':to_return}
-        return {'courses':to_return}
+            for s_id in skill_ids:
+                if len(results[s_id]) <= i:
+                    continue
+                c_id = results[s_id][i]
+                c = self.courses[c_id]
+                c["skills"] = [{"id":s_id,
+                               "name":self.graph.skills[s_id]["name"]}]
+                output.append(c)
+        return {"courses":output}
 
 
     def alternative_courses_for_skills(self, schedule, course_id,
@@ -346,7 +427,6 @@ class PathwayService:
         print('q')
         t = t0()
         skills = {}
-        
         try:
           # This is doing a full INNER JOIN between course_scores and courses, which is huge
             query = session.query(CourseScore, Course). \
@@ -360,11 +440,13 @@ class PathwayService:
             print(actual_query(query))
 
             for score, course in query:
+                if score.score_type.startswith('level:'):
+                    continue
                 if score.skill_id not in skills:
                     skills[score.skill_id] = []
                 if len(skills[score.skill_id]) >= top_n:
                     continue
-                course_out = {k:course_converters.get(k, lambda x:x)(course.__dict__[k]) for k in course_columns}
+                course_out = self._course_to_dict(course)
                 max_duration_weeks = self.constraints['time']['maximum_duration']
                 max_weekly_effort = self.constraints['time']['maximum_weekly_effort']
                 min_c_duration = self.constraints['time']['minimum_course_duration']
@@ -375,17 +457,15 @@ class PathwayService:
                     if course_out['weekly_effort'] > max_weekly_effort:
                         continue
                     d = 60*60*24*7*course_out['duration']
-                    if max_c_duration < d:
+                    if max_c_duration < course_out["duration_in_seconds"]:
                         continue
-                    if min_c_duration > d:
+                    if min_c_duration > course_out["duration_in_seconds"]:
                         continue
-                    course_out['duration_in_seconds'] = course_out['duration']*60*60*24*7
                 elif course_out['duration_code'] == 'S':
                     if max_c_duration < course_out['duration']:
                         continue
                     if min_c_duration > course_out['duration']:
                         continue
-                    course_out['duration_in_seconds'] = course_out['duration']
                 skills[score.skill_id].append([(score.skill_id, course_out),
                                                score.score])
             session.commit()
@@ -408,7 +488,7 @@ class PathwayService:
             try:
                 query = session.query(Course).filter(Course.id.in_(new_ids))
                 for course in query:
-                    courses[course.id] = {k:course_converters.get(k, lambda x:x)(course.__dict__[k]) for k in course_columns}
+                    courses[course.id] = self._course_to_dict(course)
                 session.commit()
             except:
                 session.rollback()
@@ -419,6 +499,15 @@ class PathwayService:
             self.courses.update(courses)
         courses = {i:self.courses[i] for i in course_ids}
         return courses
+
+
+    def _course_to_dict(self, course):
+        c = {k:course_converters.get(k, lambda x:x)(course.__dict__[k]) for k in course_columns}
+        if c["duration_code"] == "W":
+            c['duration_in_seconds'] = c['duration']*60*60*24*7
+        elif c["duration_code"] == "S":
+            c["duration_in_seconds"] = c["duration"]
+        return c
 
 
     def _get_candidate_course_selections(self, n):
