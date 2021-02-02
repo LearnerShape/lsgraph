@@ -5,6 +5,7 @@ from .crawlers import Crawlers, begin_crawl
 from .classifiers import Classifiers, begin_classification
 from .load import (load_courses,
                    load_scores_from_results,
+                   load_levels_from_results,
                    load_scores_from_model)
 
 @click.group()
@@ -56,18 +57,24 @@ def classify(crawl, organisation, provider, model, clean):
 
 @run.command()
 @click.option('--crawl', help='Crawl used for courses')
-@click.option('--organisation', help='Latest crawls for all providers used by organisation')
+@click.option('--organisation',
+              help='Latest crawls for all providers used by organisation')
 @click.option('--provider', help='Latest crawls for specific provider')
-@click.option('--clean', default=False, help='Update existing courses')
+@click.option('--clean', default=False, is_flag=True,
+              help='Update existing courses')
 @click.option('--courses', default=False, is_flag=True, help='Load courses')
 @click.option('--model', help='Model to obtain scores')
 @click.option('--results', help='Scoring results to load into DB')
-def load(crawl, organisation, provider, clean, courses, model, results):
+@click.option('--levels', help='Level results to load into DB')
+def load(crawl, organisation, provider, clean,
+         courses, model, results, levels):
     """Load a set of results into the environment database"""
     if courses:
         load_courses(organisation, provider, crawl, clean)
     if results:
         load_scores_from_results(organisation, results)
+    elif levels:
+        load_levels_from_results(organisation, levels)
     elif model:
         load_scores_from_model(organisation, model)
 

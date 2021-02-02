@@ -238,9 +238,11 @@ def courses_for_skill():
   constraints = get_constraints(D)
   n_courses = D.get('n_courses', 10)
   n_courses_per_skill = D.get('n_courses_per_skill', 10)
+  user = D.get('user_id', None)
 
   PS = PathwayService(G.get(D), [], [], constraints)
-  to_return = PS.courses_for_skill(skills, n_courses=n_courses,
+  to_return = PS.courses_for_skill(skills, user=user,
+                                   n_courses=n_courses,
                                    n_courses_per_skill=n_courses_per_skill)
   to_return['status_code'] = 200
   to_return['status_message'] = 'OK'
