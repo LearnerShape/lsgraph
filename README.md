@@ -102,9 +102,17 @@ The courses can be scored against the skill graph:
 
 As with crawlers, new models can also be easily created. The simple model used above can be seen at `cli/plugins/models/simple.py`.
 
-Finally, courses and scores can be loaded into the database:
+Next, courses and scores can be loaded into the database:
 
 `python ls.py --config=cli/config.json --env=testing-host load --organisation=Test --courses --model=simple`
+
+A vector representation for each skill is used during job recommendation. The packages required must first be installed by running:
+
+`pip install -r requirements-model.txt`
+
+The vector embeddings can then be generated with:
+
+`python ls.py --config=cli/config.json --env=testing-host embed --organisation=Test`
 
 
 # Contributing

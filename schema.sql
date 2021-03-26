@@ -69,6 +69,13 @@ CREATE TABLE public.skills (
 );
 
 
+CREATE TABLE public.embeddings (
+    skill_id integer,
+    use jsonb,
+    FOREIGN KEY (skill_id) REFERENCES skills (id)
+);
+
+
 CREATE TABLE public.graphs (
     id SERIAL PRIMARY KEY,
     created_at timestamp(6) without time zone DEFAULT now() NOT NULL,
