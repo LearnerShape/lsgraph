@@ -39,9 +39,6 @@ from werkzeug.exceptions import default_exceptions, HTTPException
 with open('config/greeting.txt') as f:
   print(f.read())
 
-app = Flask(__name__)
-application = app
-
 phase = os.environ["PHASE"]
 if phase is None:
   raise Exception('Unknown phase!')
@@ -53,14 +50,16 @@ else:
 print('phase ')
 print(phase)
 
+app = Flask(__name__)
+application = app
 print('Start')
 
 
 @app.before_request
 def before_request_func():
-  if request.path == '/test':
-    return
-  if request.path == '/':
+  if request.path in ['/test',
+                      '/',
+  ]:
     return
   D = request.json
   api_auth = os.environ["ENABLE_API_AUTH"].lower() == 'true'
@@ -91,6 +90,7 @@ def load_graphs(G):
 
 class G:
   g = {}
+  new_graph = lambda x: None
 
   @classmethod
   def add(cls, identifier, graph):
@@ -102,8 +102,11 @@ class G:
       identifier = D['graph_tag']
     else:
       identifier = 'ls'
+    if identifier not in cls.g:
+      n_g = cls.new_graph(identifier)
+      if n_g:
+        cls.g[identifier] = n_g
     selected_graph = cls.g[identifier]
- 
     return selected_graph
 
   @classmethod
@@ -118,6 +121,17 @@ load_graphs(G)
 
 
 
+def add_new_graph_to_cache(identifier):
+  conn = pg.connect(db_url)
+  cur = conn.cursor()
+  cur.execute("SELECT root_id FROM graphs WHERE graph_tag = %s",
+              [identifier,])
+  graph = Graph()
+  graph.root_id = cur.fetchone()[0]
+  graph.load_data_restricted(db_url, 0, identifier)
+  return graph
+
+G.new_graph = add_new_graph_to_cache
 print('Ready.')
 
 
@@ -127,7 +141,7 @@ print('Ready.')
 def format_skills(skills, fill='beginner', current=[]):
   """Convert skills to a dictionary structure"""
   if isinstance(skills, list):
-    out = {i:fill for i in skills if i not in current}
+    out = {int(i):fill for i in skills if i not in current}
   else:
     out = {int(i):j for i,j in skills.items()}
   return out
@@ -155,6 +169,8 @@ for ex in default_exceptions:
 from admin_views import admin
 app.register_blueprint(admin, url_prefix='/api/v1')
 
+from maintenance_views import maintenance
+app.register_blueprint(maintenance, url_prefix='/api/v1/maintenance')
 
 @app.route('/')
 def hello_world():
