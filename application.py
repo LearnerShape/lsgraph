@@ -442,7 +442,7 @@ def job_recommendation():
   target_skills = [profile_skill_levels(cursor,i) for i in target_profiles]
   conn.close()
 
-  job_rec = JobRecommendation(G.get(D))
+  job_rec = JobRecommendation(G.get(D), db_url)
   if method == 'distance':
     results = job_rec.multiple_jobs_by_distance(source_skills, target_skills)
   elif method == 'duration':
@@ -497,7 +497,7 @@ def workforce_planning():
   target_skills = profile_skill_levels_batch(cursor,
                                 [i['profile_id'] for i in target_profiles])
 
-  job_rec = JobRecommendation(G.get(D))
+  job_rec = JobRecommendation(G.get(D), db_url)
   wp = WorkforcePlanner(job_rec, targets_per_employee=len(target_profiles))
   for k,v in employee_profiles.items():
     wp.add_employee(k, v)
