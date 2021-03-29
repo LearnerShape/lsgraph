@@ -6,15 +6,14 @@ from psycopg2.extras import Json
 from .config import Config
 from .classifiers import get_skills
 
+tf.get_logger().setLevel('ERROR')
+
 module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
 embed = hub.load(module_url)
 
 def process(x):
-  tf.logging.set_verbosity(tf.logging.ERROR)
-  with tf.Session() as session:
-      session.run([tf.global_variables_initializer(), tf.tables_initializer()])
-      message_embeddings = session.run(embed(x))
-      return message_embeddings
+    message_embeddings = embed(x)
+    return message_embeddings
 
 
 def generate_skill_embeddings(organisations, glue=", "):
@@ -33,7 +32,7 @@ def generate_skill_embeddings(organisations, glue=", "):
             skill_ids.append(skill[-1]["id"])
     # Generate embeddings
     sp = list(skill_paths.keys())
-    embeddings = {k:v.tolist() for k,v in zip(sp, process(sp))}
+    embeddings = {k:v.numpy().tolist() for k,v in zip(sp, process(sp))}
     # Get old embeddings
     db.execute("SELECT skill_id FROM embeddings WHERE skill_id = ANY(%s)",
                [skill_ids])
@@ -54,5 +53,6 @@ def generate_skill_embeddings(organisations, glue=", "):
                     [s_id, Json(embeddings[sp])]
                 )
     Config.db_conn.commit()
+    print("Embeddings successfully created", flush=True)
 
 
