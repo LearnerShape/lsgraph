@@ -78,3 +78,11 @@ def load(crawl, organisation, provider, clean,
     elif model:
         load_scores_from_model(organisation, model)
 
+@run.command()
+@click.option("--organisation",
+              help="Generate embeddings for all skills used by organisation")
+def embed(organisation):
+    """Generate and load embeddings for skill paths"""
+    from .embedding import generate_skill_embeddings
+    click.echo("Initialising USE to generate embeddings")
+    generate_skill_embeddings(organisation)

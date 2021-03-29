@@ -13,27 +13,63 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from lsengine.pathway_service import PathwayService
+
 import numpy as np
+import pdb
+import psycopg2 as pg
 
-
+from lsengine.pathway_service import PathwayService
 
 class JobRecommendation:
 
-    def __init__(self, graph):
-        self.graph = graph
-
-
-    def job_by_distance(self, source_skills, target_skills):
-        """Convert a skill gap to a distance
-
-        The step size from one level of experience to another is
-        pre-defined and skills are treated entirely independently"""
-        skill_rank = {'no knowledge':0,
+    skill_rank = {'no knowledge':0,
                       'beginner':1,
                       'intermediate':2,
                       'advanced':3,
                       'expert':4}
+
+    def __init__(self, graph, db_url=None, skill_rank=None,
+                 multiplier_threshold=1.0, multiplier_baseline=0.0,
+                 multiplier_offset=np.sqrt(2), multiplier_power=2,
+                 max_skills=5
+    ):
+        """Initialise with parameters
+
+        skill_rank: Dictionary mapping skill levels to numerical values
+        Variables determining how embedding euclidean distances are
+            converted to a multiplier on learning rate:
+        multiplier_threshold: The maximum distance before the multiplier
+            is set to baseline
+        multiplier_baseline:  The multiplier used when multiplier reaches
+            the threshold (distant skills should contribute little or
+            nothing towards learning)
+        multiplier_offset:    The minimum point for the learning speed
+            conversion
+        multiplier_power:     An exponent applied to the learning
+            speed conversion
+        max_skills:           The maximum number of close skills that modify
+            required learning
+        """
+        self.graph = graph
+        self.db_url = db_url
+        if skill_rank:
+            self.skill_rank = skill_rank
+        self.max_skill_gap = (max(self.skill_rank.values())
+                              - min(self.skill_rank.values())
+        )
+        self.multiplier_threshold = multiplier_threshold
+        self.multiplier_baseline = multiplier_baseline
+        self.multiplier_offset = multiplier_offset
+        self.multiplier_power = multiplier_power
+        self.max_skills = max_skills
+
+
+    def job_by_simple_distance(self, source_skills, target_skills):
+        """Convert a skill gap to a distance
+
+        The step size from one level of experience to another is
+        pre-defined and skills are treated entirely independently"""
+        skill_rank = self.skill_rank
         d = 0
         skills = []
         for s,l in target_skills.items():
@@ -50,6 +86,84 @@ class JobRecommendation:
                                                              "no knowledge"),
                            "target_level":l})
         return {"distance":d, "skills":skills}
+
+
+    def job_by_distance(self, source_skills, target_skills):
+        """Convert a skill gap to a distance considering how
+        skills are related"""
+        all_skills = []
+        all_skills.extend(source_skills.keys())
+        all_skills.extend(target_skills.keys())
+        embeddings = self._get_embeddings(all_skills)
+        total_distance = 0
+        skills = []
+        profile_sum = 0
+        for t_id, t_level in target_skills.items():
+            profile_sum += self.skill_rank[t_level]
+            s_level = source_skills.get(t_id, 'no knowledge')
+            skills.append({"id":t_id,
+                           "name":self.graph.skills[t_id]["name"],
+                           "current_level":s_level,
+                           "target_level":t_level,
+            })
+            tl = self.skill_rank[t_level]
+            sl = self.skill_rank[s_level]
+            if sl >= tl:
+                continue
+            all_multipliers = [
+                (self._get_learning_speed(embeddings[t_id], embeddings[i]),
+                 self.skill_rank[j])
+                for i,j in source_skills.items()
+                if (t_id != i)
+            ]
+            all_multipliers.sort(key=lambda x:x[0], reverse=True)
+            d = self.skill_rank[t_level] - self.skill_rank[s_level]
+            for multiplier,level in all_multipliers[:self.max_skills]:
+                level_multiplier = min(tl, level) - min(sl, level)
+                level_multiplier /= self.max_skill_gap
+                d -= multiplier * d * level_multiplier
+            total_distance += d
+        if profile_sum == 0:
+            fit = 100
+        else:
+            fit = 100 * (profile_sum - total_distance) / profile_sum
+        fit = round(fit, 2)
+        total_distance = round(total_distance, 2)
+        return {"distance":total_distance,
+                "skills":skills,
+                "fit":fit,
+        }
+
+
+    def _get_embeddings(self, skill_ids):
+        """Fetch embeddings from the database"""
+        conn = pg.connect(self.db_url)
+        cursor = conn.cursor()
+        embeddings = {i:None for i in skill_ids}
+        try:
+            cursor.execute(
+                "SELECT skill_id, use FROM embeddings WHERE skill_id = ANY(%s)",
+                [skill_ids]
+            )
+            embeddings.update({k:np.array(v) for k,v in cursor.fetchall()})
+        except:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+        return embeddings
+
+
+    def _get_learning_speed(self, embed1, embed2):
+        """From two embeddings generate a training speed multiplier"""
+        if (embed1 is None) or (embed2 is None):
+            return self.multiplier_baseline
+        d = np.linalg.norm(embed1 - embed2)
+        if d > self.multiplier_threshold:
+            return self.multiplier_baseline
+        y = ((self.multiplier_offset - d)/self.multiplier_offset)
+        y = y ** self.multiplier_power
+        return y
 
 
     def job_by_duration(self, source_skills, target_skills,
