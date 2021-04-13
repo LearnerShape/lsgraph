@@ -61,7 +61,7 @@ Then exit the container with Ctrl-D.
 
 ## First run
 
-In the terminal running the database press Ctrl-D to stop it. Then, run both the database and lsgraph web application with:
+In the terminal running the database press Ctrl-C to stop it. Then, run both the database and lsgraph web application with:
 
 `docker-compose up --build`
 
