@@ -1,5 +1,7 @@
 # lsgraph
 
+**The public-api branch is in the early stages of development. Documentation, including this README, may not match code functionality**
+
 lsgraph was created with the aim of supporting reskilling and upskilling for both organisations and individuals, using machine learning and other data science methods. Over time, we plan to include in lsgraph a steadily increasing set of services for this purpose. 
 
 lsgraph currently provides services to:
