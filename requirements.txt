@@ -6,3 +6,5 @@ python-dateutil
 pytz
 bs4
 gunicorn
+flask-migrate 
+flask-sqlalchemy
