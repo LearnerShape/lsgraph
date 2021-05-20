@@ -11,7 +11,7 @@ Welcome to lsgraph's documentation!
    :caption: Contents:
 
    api/index.rst
-
+   database/index.rst
 
 
 Indices and tables
