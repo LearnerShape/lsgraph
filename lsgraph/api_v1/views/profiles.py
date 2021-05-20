@@ -3,17 +3,17 @@ from flask.views import MethodView
 
 class ProfilesAPI(MethodView):
     def get(self, org_uuid):
-        """Groups endpoint
+        """Profiles endpoint
 
-        .. :quickref: Get groups
+        .. :quickref: Get profiles
 
         """
         return "Hello"
 
     def post(self, org_uuid):
-        """Groups endpoint
+        """Profile creation endpoint
 
-        .. :quickref: Create new group
+        .. :quickref: Create new profile
 
         """
         return "Hello"
@@ -21,25 +21,25 @@ class ProfilesAPI(MethodView):
 
 class ProfilesDetailAPI(MethodView):
     def get(self, org_uuid, profile_uuid):
-        """Groups endpoint
+        """Profile detail endpoint
 
-        .. :quickref: Get groups
+        .. :quickref: Get profile detail
 
         """
         return "Hello"
 
     def put(self, org_uuid, profile_uuid):
-        """Groups endpoint
+        """Profile update endpoint
 
-        .. :quickref: Create new group
+        .. :quickref: Update profile
 
         """
         return "Hello"
 
     def delete(self, org_uuid, profile_uuid):
-        """Groups endpoint
+        """Profile deletion endpoint
 
-        .. :quickref: Create new group
+        .. :quickref: Delete profile
 
         """
         return "Hello"

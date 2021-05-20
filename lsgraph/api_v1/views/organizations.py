@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 from flask.views import MethodView
+from flask import current_app
 
 
 class OrganizationsAPI(MethodView):
@@ -24,7 +24,7 @@ class OrganizationsAPI(MethodView):
         .. :quickref: Get organizations
 
         """
-        return "Hello"
+        return current_app.config["TEST_CONFIG_VALUE"]
 
     def post(self):
         """Organization creation endpoint

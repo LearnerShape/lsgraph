@@ -27,7 +27,7 @@ class GroupsAPI(MethodView):
         return "Hello"
 
     def post(self, org_uuid):
-        """Groups endpoint
+        """Group creation endpoint
 
         .. :quickref: Create new group
 
@@ -37,25 +37,25 @@ class GroupsAPI(MethodView):
 
 class GroupsDetailAPI(MethodView):
     def get(self, org_uuid, group_uuid):
-        """Groups endpoint
+        """Group detail endpoint
 
-        .. :quickref: Get groups
+        .. :quickref: Get group detail
 
         """
         return "Hello"
 
     def put(self, org_uuid, group_uuid):
-        """Groups endpoint
+        """Group update endpoint
 
-        .. :quickref: Create new group
+        .. :quickref: Update group
 
         """
         return "Hello"
 
     def delete(self, org_uuid, group_uuid):
-        """Groups endpoint
+        """Group deletion endpoint
 
-        .. :quickref: Create new group
+        .. :quickref: Delete group
 
         """
         return "Hello"
