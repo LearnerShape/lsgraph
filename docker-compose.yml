@@ -16,7 +16,7 @@ services:
           - lsdatabase
 
     lsdatabase:
-        image: postgres:9.6
+        image: postgres:11
         volumes:
           - lsdb_data:/var/lib/postgresql
         environment:
