@@ -21,9 +21,9 @@ from . import db
 
 
 class Profile(db.Model):
-    """A group of users
+    """A skills profile
 
-    Used to manage access to learning resources"""
+    Used as current state of learner, learning objective, job requirements, etc"""
 
     id = db.Column(
         UUID(as_uuid=True),
@@ -33,3 +33,10 @@ class Profile(db.Model):
         nullable=False,
     )
     name = db.Column(db.String(512))
+    description = db.Column(db.Text)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"), index=True)
+    organization_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
+    )
+    type = db.Column(db.String(256))
+    previous_version = db.Column(UUID(as_uuid=True), db.ForeignKey("profile.id"))

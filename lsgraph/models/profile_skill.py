@@ -20,9 +20,7 @@ from . import db
 
 
 class ProfileSkill(db.Model):
-    """A group of users
-
-    Used to manage access to learning resources"""
+    """Skills included in a profile"""
 
     id = db.Column(
         UUID(as_uuid=True),
@@ -31,4 +29,6 @@ class ProfileSkill(db.Model):
         unique=True,
         nullable=False,
     )
-    name = db.Column(db.String(512))
+    profile_id = db.Column(UUID(as_uuid=True), db.ForeignKey("profile.id"), index=True)
+    skill_id = db.Column(UUID(as_uuid=True), db.ForeignKey("skill.id"))
+    level = db.Column(db.Float)

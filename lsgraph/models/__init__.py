@@ -19,11 +19,28 @@ from flask_migrate import Migrate
 
 db = SQLAlchemy()
 
-__all__ = ["Organization", "Resource", "Format", "Offering", "Price", "Platform",
-           "Provider", "Collection", "CollectionResource", "CollectionMember",
-           "Group", "GroupMember", "QualityAttribute", "QualityValue", "Skill",
-           "SkillInclude", "User", "Customer", "AccessKey", "Profile",
-           "ProfileSkill",
+__all__ = [
+    "Organization",
+    "Resource",
+    "Format",
+    "Offering",
+    "Price",
+    "Platform",
+    "Provider",
+    "Collection",
+    "CollectionResource",
+    "CollectionMember",
+    "Group",
+    "GroupMember",
+    "QualityAttribute",
+    "QualityValue",
+    "Skill",
+    "SkillInclude",
+    "User",
+    "Customer",
+    "AccessKey",
+    "Profile",
+    "ProfileSkill",
 ]
 
 
@@ -46,25 +63,5 @@ from .skill_include import SkillInclude
 from .user import User
 from .customer import Customer
 from .access_key import AccessKey
-from .profile import Profile  #
-from .profile_skill import ProfileSkill  #
-
-
-
-# from sqlalchemy.dialects.postgresql import UUID
-
-#     id = db.Column(
-#         UUID(as_uuid=True),
-#         primary_key=True,
-#         default=uuid.uuid4,
-#         unique=True,
-#         nullable=False,
-#     )
-#     name = db.Column(db.Text)
-#     short_description = db.Column(db.Text)
-#     description = db.Column(db.Text)
-#     url = db.Column(db.Text)
-#     provider_id = db.Column(db.Integer, db.ForeignKey("provider.id"))
-
-# created_at
-# updated_at
+from .profile import Profile
+from .profile_skill import ProfileSkill
