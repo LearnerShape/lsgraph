@@ -41,6 +41,7 @@ __all__ = [
     "AccessKey",
     "Profile",
     "ProfileSkill",
+    "Level",
 ]
 
 
@@ -65,3 +66,4 @@ from .customer import Customer
 from .access_key import AccessKey
 from .profile import Profile
 from .profile_skill import ProfileSkill
+from .level import Level
