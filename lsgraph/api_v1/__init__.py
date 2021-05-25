@@ -14,11 +14,39 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from flask import Blueprint
+from flask import abort, Blueprint, current_app, request
+import pdb
+from werkzeug.exceptions import default_exceptions
+
+from lsgraph.utils.access_key import AccessKey
+from lsgraph import models
 
 api = Blueprint("api_v1", __name__, url_prefix="/api/v1")
 
+
+@api.before_request
+def require_access_headers():
+    """Require that appropriate headers are set"""
+    if request.path in []:
+        # List of paths that do not require access headers
+        return
+    ak = AccessKey(current_app.config["SECRET_KEY"])
+    access_id = request.headers.get("X-API-Key")
+    access_secret = request.headers.get("X-Auth-Token")
+    if not access_id or not access_secret:
+        abort(403)
+    # if not ak.validate_pair(access_id, access_secret):
+    #    abort(403)
+    # Check that credentials exist
+    record = models.AccessKey.query.filter_by(access_key=access_id).all()
+    if not record or record[0].secret_key != access_secret:
+        abort(403)
+
+
 from .views import *
+
+for ex in default_exceptions:
+    api.register_error_handler(ex, handle_error)
 
 # Organizations
 api.add_url_rule("organizations/", view_func=OrganizationsAPI.as_view("organizations"))

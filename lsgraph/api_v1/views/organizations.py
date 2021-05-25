@@ -24,7 +24,8 @@ class OrganizationsAPI(MethodView):
         .. :quickref: Get organizations
 
         """
-        return current_app.config["TEST_CONFIG_VALUE"]
+        # return current_app.config["TEST_CONFIG_VALUE"]
+        return "Hello"
 
     def post(self):
         """Organization creation endpoint

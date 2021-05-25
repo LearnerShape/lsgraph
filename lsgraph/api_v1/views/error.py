@@ -13,14 +13,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from flask import jsonify
+from werkzeug.exceptions import default_exceptions, HTTPException
 
-from .error import handle_error
-from .organizations import OrganizationsAPI, OrganizationsDetailAPI
-from .graphs import GraphsAPI, GraphsDetailAPI
-from .skills import SkillsAPI, SkillsDetailAPI
-from .resources import ResourcesAPI, ResourcesDetailAPI
-from .groups import GroupsAPI, GroupsDetailAPI
-from .collections import CollectionsAPI, CollectionsDetailAPI, CollectionResourcesAPI
-from .pathways import PathwaysAPI, PathwaysDetailAPI
-from .users import UsersAPI, UsersDetailAPI
-from .profiles import ProfilesAPI, ProfilesDetailAPI
+
+def handle_error(e):
+    code = 500
+    if isinstance(e, HTTPException):
+        code = e.code
+    msg = default_exceptions[code].description
+    return jsonify({"status_code": code, "status_message": msg}), code
