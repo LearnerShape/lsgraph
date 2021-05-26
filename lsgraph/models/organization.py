@@ -32,3 +32,4 @@ class Organization(db.Model):
     )
     name = db.Column(db.String(128))
     customer_id = db.Column(UUID(as_uuid=True), db.ForeignKey("customer.id"))
+    root_skill_id = db.Column(UUID(as_uuid=True), db.ForeignKey("skill.id"))
