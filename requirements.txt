@@ -8,3 +8,4 @@ bs4
 gunicorn
 flask-migrate 
 flask-sqlalchemy
+marshmallow

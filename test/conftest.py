@@ -8,17 +8,17 @@ from lsgraph.models import AccessKey, Customer, db
 from lsgraph.utils.access_key import AccessKey as AccessKeyGen
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def lsgraph_client():
     app = create_app()
     with app.test_client() as client:
         yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def lsgraph_admin_user():
     app = create_app()
-    time = datetime.now().strftime("%Y%M%d%H%m%S")
+    time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
     with app.app_context():
         test_customer = Customer(email=f"{time}@learnershape.com", name="Test")
         db.session.add(test_customer)
@@ -35,7 +35,3 @@ def lsgraph_admin_user():
         db.session.add(test_keys)
         db.session.commit()
     yield customer_id, access_id, access_secret
-    with app.app_context():
-        db.session.delete(test_keys)
-        db.session.delete(test_customer)
-        db.session.commit()

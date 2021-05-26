@@ -14,18 +14,51 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask.views import MethodView
-from flask import current_app
+from flask import abort, current_app, g, jsonify, request
+from marshmallow import ValidationError
+import pdb
+
+from lsgraph import models
+from lsgraph.models import db
+from ..schemas import OrganizationSchema
+
+
+def create_root_skill():
+    root = models.Skill(name="Root", description="")
+    db.session.add(root)
+    db.session.commit()
+    return root.id
+
+
+def save_level_mapping(org_id, mapping):
+    for name, cutoff in mapping.items():
+        db.session.add(models.Level(organization_id=org_id, name=name, cutoff=cutoff))
+    db.session.commit()
+
+
+def create_new_organization(org_data):
+    root_skill_id = create_root_skill()
+    new_org = models.Organization(
+        name=org_data["name"], customer_id=g.customer, root_skill_id=root_skill_id
+    )
+    db.session.add(new_org)
+    db.session.commit()
+    save_level_mapping(new_org.id, org_data["level_map"])
+    return new_org
 
 
 class OrganizationsAPI(MethodView):
+    org_schema = OrganizationSchema()
+    orgs_schema = OrganizationSchema(many=True)
+
     def get(self):
         """Organizations endpoint
 
         .. :quickref: Get organizations
 
         """
-        # return current_app.config["TEST_CONFIG_VALUE"]
-        return "Hello"
+        orgs = models.Organization.query.filter_by(customer_id=g.customer).all()
+        return jsonify({"organizations": self.orgs_schema.dump(orgs)})
 
     def post(self):
         """Organization creation endpoint
@@ -33,7 +66,12 @@ class OrganizationsAPI(MethodView):
         .. :quickref: Create new organization
 
         """
-        return "Hello"
+        try:
+            data = self.org_schema.load(request.json)
+        except ValidationError as err:
+            return {"status_code": 422, "status_message": err.messages}, 422
+        new_org = create_new_organization(data)
+        return jsonify(self.org_schema.dump(new_org))
 
 
 class OrganizationsDetailAPI(MethodView):
