@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from flask import abort, Blueprint, current_app, request
+from flask import abort, Blueprint, current_app, g, request
 import pdb
 from werkzeug.exceptions import default_exceptions
 
@@ -41,6 +41,8 @@ def require_access_headers():
     record = models.AccessKey.query.filter_by(access_key=access_id).all()
     if not record or record[0].secret_key != access_secret:
         abort(403)
+    customer = models.Customer.query.filter_by(id=record[0].customer_id).one()
+    g.customer = customer.id
 
 
 from .views import *
