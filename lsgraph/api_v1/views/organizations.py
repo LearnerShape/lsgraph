@@ -36,6 +36,14 @@ def save_level_mapping(org_id, mapping):
     db.session.commit()
 
 
+def create_whole_org_group(org_id, name):
+    new_group = models.Group(
+        name=f"{name}:All members", organization_id=org_id, whole_organization=True
+    )
+    db.session.add(new_group)
+    db.session.commit()
+
+
 def create_new_organization(org_data):
     root_skill_id = create_root_skill()
     new_org = models.Organization(
@@ -44,6 +52,7 @@ def create_new_organization(org_data):
     db.session.add(new_org)
     db.session.commit()
     save_level_mapping(new_org.id, org_data["level_map"])
+    create_whole_org_group(new_org.id, org_data["name"])
     return new_org
 
 

@@ -32,4 +32,8 @@ class Group(db.Model):
         unique=True,
         nullable=False,
     )
+    organization_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
+    )
     name = db.Column(db.String(512))
+    whole_organization = db.Column(db.Boolean)
