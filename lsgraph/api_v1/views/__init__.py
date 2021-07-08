@@ -16,11 +16,19 @@
 
 from .error import handle_error
 from .organizations import OrganizationsAPI, OrganizationsDetailAPI
-from .graphs import GraphsAPI, GraphsDetailAPI
+
+# from .graphs import GraphsAPI, GraphsDetailAPI
 from .skills import SkillsAPI, SkillsDetailAPI
-from .resources import ResourcesAPI, ResourcesDetailAPI
-from .groups import GroupsAPI, GroupsDetailAPI
-from .collections import CollectionsAPI, CollectionsDetailAPI, CollectionResourcesAPI
-from .pathways import PathwaysAPI, PathwaysDetailAPI
+
+# from .resources import ResourcesAPI, ResourcesDetailAPI
+from .groups import GroupsAPI, GroupsDetailAPI, GroupMembersAPI, GroupMembersDetailAPI
+
+# from .collections import CollectionsAPI, CollectionsDetailAPI, CollectionResourcesAPI
+# from .pathways import PathwaysAPI, PathwaysDetailAPI
 from .users import UsersAPI, UsersDetailAPI
-from .profiles import ProfilesAPI, ProfilesDetailAPI
+from .profiles import (
+    ProfilesAPI,
+    ProfilesDetailAPI,
+    ProfileSkillsAPI,
+    ProfileSkillsDetailAPI,
+)

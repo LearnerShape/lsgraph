@@ -9,3 +9,4 @@ gunicorn
 flask-migrate 
 flask-sqlalchemy
 marshmallow
+flask-smorest

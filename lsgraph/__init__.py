@@ -17,6 +17,7 @@
 import os
 
 from flask import Flask
+from flask_smorest import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
@@ -48,8 +49,10 @@ def create_app(test_config=None):
     models.db.init_app(app)
     migrate = Migrate(app, models.db)
 
+    api = Api(app)
+
     from . import api_v1
 
-    app.register_blueprint(api_v1.api)
+    api.register_blueprint(api_v1.api)
 
     return app

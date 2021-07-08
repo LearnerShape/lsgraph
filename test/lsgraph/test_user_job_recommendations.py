@@ -14,26 +14,22 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
+from datetime import datetime
+import pdb
+import pytest
 
-from . import db
+from .test_profile import create_profile
 
 
-class User(db.Model):
-    """A user record
-
-    A learner/member/employee managed by an organization"""
-
-    id = db.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        unique=True,
-        nullable=False,
-    )
-    email = db.Column(db.Text)
-    name = db.Column(db.Text)
-    organization_id = db.Column(
-        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
-    )
+@pytest.mark.skip(reason="Not implemented")
+def test_job_recommendation_list(lsgraph_client, test_data_2org):
+    (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
+    customer_id, access_id, access_secret = c1
+    org_id = org1["id"]
+    
+@pytest.mark.skip(reason="Not implemented")
+def test_job_recommendation_type(lsgraph_client, test_data_2org):
+    (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
+    customer_id, access_id, access_secret = c1
+    org_id = org1["id"]
+    

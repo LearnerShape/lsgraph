@@ -35,5 +35,5 @@ class Customer(db.Model):
     email = db.Column(db.Text, unique=True, index=True)
     name = db.Column(db.Text)
     password_hash = db.Column(
-        db.Binary(60),
+        db.LargeBinary(60),
     )

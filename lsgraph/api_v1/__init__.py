@@ -14,14 +14,15 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from flask import abort, Blueprint, current_app, g, request
+from flask import current_app, g, request
+from flask_smorest import abort, Blueprint
 import pdb
 from werkzeug.exceptions import default_exceptions
 
 from lsgraph.utils.access_key import AccessKey
 from lsgraph import models
 
-api = Blueprint("api_v1", __name__, url_prefix="/api/v1")
+api = Blueprint("api_v1", __name__, url_prefix="/api/v1", description="API version 1")
 
 
 @api.before_request
@@ -42,99 +43,12 @@ def require_access_headers():
     if not record or record[0].secret_key != access_secret:
         abort(403)
     customer = models.Customer.query.filter_by(id=record[0].customer_id).one()
-    g.customer = customer.id
+    g.customer = customer
+    organizations = models.Organization.query.filter_by(customer_id=customer.id).all()
+    g.organizations = {str(i.id): i for i in organizations}
 
 
 from .views import *
 
 for ex in default_exceptions:
     api.register_error_handler(ex, handle_error)
-
-# Organizations
-api.add_url_rule("organizations/", view_func=OrganizationsAPI.as_view("organizations"))
-api.add_url_rule(
-    "organizations/<org_uuid>/",
-    view_func=OrganizationsDetailAPI.as_view("organizations_detail"),
-)
-
-# Graphs
-api.add_url_rule("graphs/", view_func=GraphsAPI.as_view("graphs"))
-api.add_url_rule(
-    "graphs/<graph_uuid>/",
-    view_func=GraphsDetailAPI.as_view("graphs_detail"),
-)
-
-# Skills
-api.add_url_rule(
-    "organizations/<org_uuid>/skills/", view_func=SkillsAPI.as_view("skills")
-)
-api.add_url_rule(
-    "organizations/<org_uuid>/skills/<skill_uuid>/",
-    view_func=SkillsDetailAPI.as_view("skills_detail"),
-)
-
-# Resources
-api.add_url_rule(
-    "organizations/<org_uuid>/resources/", view_func=ResourcesAPI.as_view("resources")
-)
-api.add_url_rule(
-    "organizations/<org_uuid>/resources/<resource_uuid>/",
-    view_func=ResourcesDetailAPI.as_view("resources_detail"),
-)
-
-# Groups
-api.add_url_rule(
-    "organizations/<org_uuid>/groups/", view_func=GroupsAPI.as_view("groups")
-)
-api.add_url_rule(
-    "organizations/<org_uuid>/groups/<group_uuid>/",
-    view_func=GroupsDetailAPI.as_view("groups_detail"),
-)
-
-# Collections
-api.add_url_rule("collections/", view_func=CollectionsAPI.as_view("collections"))
-api.add_url_rule(
-    "organizations/<org_uuid>/collections/",
-    view_func=CollectionsAPI.as_view("org_collections"),
-)
-api.add_url_rule(
-    "collections/<collection_uuid>/",
-    view_func=CollectionsDetailAPI.as_view("collections_detail"),
-)
-api.add_url_rule(
-    "organizations/<org_uuid>/collections/<collection_uuid>/",
-    view_func=CollectionsDetailAPI.as_view("org_collections_detail"),
-)
-api.add_url_rule(
-    "collections/<collection_uuid>/resources/",
-    view_func=CollectionResourcesAPI.as_view("collections_resources"),
-)
-api.add_url_rule(
-    "organizations/<org_uuid>/collections/<collection_uuid>/resources/",
-    view_func=CollectionResourcesAPI.as_view("org_collections_resources"),
-)
-
-# Pathways
-api.add_url_rule(
-    "organizations/<org_uuid>/pathways/", view_func=PathwaysAPI.as_view("pathways")
-)
-api.add_url_rule(
-    "organizations/<org_uuid>/pathways/<pathway_uuid>/",
-    view_func=PathwaysDetailAPI.as_view("pathways_detail"),
-)
-
-# Users
-api.add_url_rule("organizations/<org_uuid>/users/", view_func=UsersAPI.as_view("users"))
-api.add_url_rule(
-    "organizations/<org_uuid>/users/<user_uuid>/",
-    view_func=UsersDetailAPI.as_view("users_detail"),
-)
-
-# Profiles
-api.add_url_rule(
-    "organizations/<org_uuid>/profiles/", view_func=ProfilesAPI.as_view("profiles")
-)
-api.add_url_rule(
-    "organizations/<org_uuid>/profiles/<profile_uuid>/",
-    view_func=ProfilesDetailAPI.as_view("profiles_detail"),
-)

@@ -15,47 +15,84 @@
 
 
 from flask.views import MethodView
+from flask import g
+from flask_smorest import abort
+from marshmallow import ValidationError
+import pdb
+
+from lsgraph import models
+from lsgraph.models import db
+from lsgraph.api_v1 import api
+from lsgraph.api_v1.schemas import UserSchema, UserManySchema, JobRecommendationQuerySchema, JobRecommendationManySchema
 
 
+def create_new_user(user_data, org_uuid):
+    """Create a new user record"""
+    # Add to user table
+    new_user = models.User(
+        name=user_data["name"], email=user_data["email"], organization_id=org_uuid
+    )
+    db.session.add(new_user)
+    db.session.commit()
+    # Create user profile
+    new_profile = models.Profile(
+        name=user_data["name"],
+        organization_id=org_uuid,
+        user_id=new_user.id,
+        type="user_profile",
+    )
+    db.session.add(new_profile)
+    db.session.commit()
+    # Add to whole org group
+    whole_org_group = models.Group.query.filter_by(
+        organization_id=org_uuid, whole_organization=True
+    ).all()
+    for group in whole_org_group:
+        new_member = models.GroupMember(user_id=new_user.id, group_id=group.id)
+        db.session.add(new_member)
+    db.session.commit()
+    output = {
+        "id": new_user.id,
+        "email": new_user.email,
+        "name": new_user.name,
+        "profile": new_profile.id,
+    }
+    return output
+
+
+@api.route("organizations/<org_uuid>/users/")
 class UsersAPI(MethodView):
+    @api.response(200, UserManySchema)
     def get(self, org_uuid):
-        """Users endpoint
+        """Get users"""
+        users = models.User.query.filter_by(organization_id=org_uuid).all()
+        return {"users": users}
 
-        .. :quickref: Get users
-
-        """
-        return "Hello"
-
-    def post(self, org_uuid):
-        """User creation endpoint
-
-        .. :quickref: Create new user
-
-        """
-        return "Hello"
+    @api.arguments(UserSchema, location="json")
+    @api.response(200, UserSchema)
+    def post(self, user_data, org_uuid):
+        """Add user"""
+        new_user = create_new_user(user_data, org_uuid)
+        return new_user
 
 
+@api.route("organizations/<org_uuid>/users/<user_uuid>/")
 class UsersDetailAPI(MethodView):
+    @api.response(200, UserSchema)
     def get(self, org_uuid, user_uuid):
-        """User detail endpoint
+        """Get user details"""
+        return models.User.query.filter_by(id=user_uuid, organization_id=org_uuid).one()
 
-        .. :quickref: Get user detail
-
-        """
-        return "Hello"
-
-    def put(self, org_uuid, user_uuid):
-        """User update endpoint
-
-        .. :quickref: Update user
-
-        """
-        return "Hello"
-
+    @api.response(204)
     def delete(self, org_uuid, user_uuid):
-        """User deletion endpoint
+        """Delete user"""
+        abort(500)
 
-        .. :quickref: Delete user
 
-        """
-        return "Hello"
+@api.route("organizations/<org_uuid>/users/<user_uuid>/job_recommendations/")
+class UsersDetailAPI(MethodView):
+    @api.arguments(JobRecommendationQuerySchema, location="json")
+    @api.response(200, JobRecommendationManySchema)
+    def get(self, org_uuid, user_uuid):
+        """Get job recommendations"""
+        abort(500)

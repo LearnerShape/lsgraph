@@ -1,8 +1,6 @@
+from datetime import datetime
 import pdb
 import pytest
-
-
-from lsgraph import create_app
 
 
 def test_access_no_headers(lsgraph_client):
@@ -30,10 +28,13 @@ def test_organization_get(lsgraph_client, lsgraph_admin_user):
 
 def test_organization_create(lsgraph_client, lsgraph_admin_user):
     customer_id, access_id, access_secret = lsgraph_admin_user
+    org_name = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
     response = lsgraph_client.post(
         "/api/v1/organizations/",
         headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
-        json={"name": "Org1",},
+        json={
+            "name": org_name,
+        },
     )
     assert response.status_code == 200
     assert "id" in response.json
@@ -44,4 +45,20 @@ def test_organization_create(lsgraph_client, lsgraph_admin_user):
     )
     assert response.status_code == 200
     assert "organizations" in response.json.keys()
-    assert "Org1" in [i["name"] for i in response.json["organizations"]]
+    assert org_name in [i["name"] for i in response.json["organizations"]]
+
+
+def test_organization_get_detail(
+    lsgraph_client, lsgraph_admin_user, lsgraph_organization
+):
+    customer_id, access_id, access_secret = lsgraph_admin_user
+    org_id = lsgraph_organization["id"]
+    org_name = lsgraph_organization["name"]
+    response = lsgraph_client.get(
+        f"/api/v1/organizations/{org_id}/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 200
+    assert "name" in response.json.keys()
+    assert "root_skill" in response.json.keys()
+    assert "level_map" in response.json.keys()
