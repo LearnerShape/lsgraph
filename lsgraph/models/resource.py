@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 import uuid
 
 from . import db
@@ -46,3 +46,4 @@ class Resource(db.Model):
     learning_outcomes = db.Column(db.Text)
     prerequisite_knowledge = db.Column(db.Text)
     retired = db.Column(db.Boolean)
+    resource_recommendation_vector = db.Column(ARRAY(db.Float))

@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
 import uuid
 
 from . import db
@@ -34,3 +34,5 @@ class Skill(db.Model):
     description = db.Column(db.Text)
     personal = db.Column(db.Boolean)
     creator_id = db.Column(UUID(as_uuid=True), db.ForeignKey("user.id"))
+    skill_embedding = db.Column(ARRAY(db.Float))
+    resource_recommendation_vector = db.Column(ARRAY(db.Float))
