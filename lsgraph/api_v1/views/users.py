@@ -64,14 +64,18 @@ def create_new_user(user_data, org_uuid):
 class UsersAPI(MethodView):
     @api.response(200, UserManySchema)
     def get(self, org_uuid):
-        """Get users"""
+        """Get users
+
+        Get a list of all users within the organization"""
         users = models.User.query.filter_by(organization_id=org_uuid).all()
         return {"users": users}
 
     @api.arguments(UserSchema, location="json")
     @api.response(200, UserSchema)
     def post(self, user_data, org_uuid):
-        """Add user"""
+        """Add user
+
+        Add a new user to the organization"""
         new_user = create_new_user(user_data, org_uuid)
         return new_user
 

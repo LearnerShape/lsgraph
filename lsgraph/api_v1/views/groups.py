@@ -108,14 +108,18 @@ def get_group_members(org_id, group_id):
 class GroupsAPI(MethodView):
     @api.response(200, GroupManySchema)
     def get(self, org_uuid):
-        """Get groups"""
+        """Get groups
+
+        Get a list of all groups for an organization"""
         groups = models.Group.query.filter_by(organization_id=org_uuid).all()
         return {"groups": groups}
 
     @api.arguments(GroupSchema, location="json")
     @api.response(200, GroupSchema)
     def post(self, group_data, org_uuid):
-        """Add group"""
+        """Add group
+
+        Create a new group for an organization"""
         new_group = create_new_group(group_data, org_uuid)
         return new_group
 
@@ -124,13 +128,17 @@ class GroupsAPI(MethodView):
 class GroupsDetailAPI(MethodView):
     @api.response(200, GroupSchema)
     def get(self, org_uuid, group_uuid):
-        """Get group details"""
+        """Get group details
+
+        Get detailed information on a specific group"""
         group = get_group(org_uuid, group_uuid)
         return group
 
     @api.response(204)
     def delete(self, org_uuid, group_uuid):
-        """Delete group"""
+        """Delete group
+
+        Delete a group from an organization"""
         group = models.Group.query.filter_by(
             organization_id=org_uuid, id=group_uuid
         ).one()
@@ -145,14 +153,18 @@ class GroupsDetailAPI(MethodView):
 class GroupMembersAPI(MethodView):
     @api.response(200, GroupMembersSchema)
     def get(self, org_uuid, group_uuid):
-        """Group members endpoint"""
+        """Get group members
+
+        Get a list of members for a specific group"""
         members = get_group_members(org_uuid, group_uuid)
         return {"members": members}
 
     @api.arguments(GroupMembersSchema, location="json")
     @api.response(200, GroupSchema)
     def post(self, members_data, org_uuid, group_uuid):
-        """Update group members"""
+        """Update group members
+
+        Add additional members to a specific group"""
         add_members(org_uuid, group_uuid, [i["id"] for i in members_data["members"]])
         members = get_group_members(org_uuid, group_uuid)
         return {"members": members}
@@ -162,7 +174,9 @@ class GroupMembersAPI(MethodView):
 class GroupMembersDetailAPI(MethodView):
     @api.response(204)
     def delete(self, org_uuid, group_uuid, user_uuid):
-        """Delete group member"""
+        """Delete group member
+
+        Delete a specific member from a group"""
         member = (
             models.GroupMember.query.filter_by(group_id=group_uuid)
             .filter_by(user_id=user_uuid)

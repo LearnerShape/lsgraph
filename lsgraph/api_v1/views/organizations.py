@@ -67,14 +67,18 @@ def create_new_organization(org_data):
 class OrganizationsAPI(MethodView):
     @api.response(200, OrganizationManySchema)
     def get(self):
-        """Get organizations"""
+        """Get organizations
+
+        Get a list of all organizations"""
         orgs = models.Organization.query.filter_by(customer_id=g.customer.id).all()
         return {"organizations": orgs}
 
     @api.arguments(OrganizationSchema, location="json")
     @api.response(200, OrganizationSchema)
     def post(self, org_data):
-        """Add organization"""
+        """Add organization
+
+        Add a new organization to the customer account"""
         new_org = create_new_organization(org_data)
         return new_org
 
@@ -83,7 +87,9 @@ class OrganizationsAPI(MethodView):
 class OrganizationsDetailAPI(MethodView):
     @api.response(200, OrganizationSchema)
     def get(self, org_uuid):
-        """Get organization detail"""
+        """Get organization detail
+
+        Get detailed information on a specific organization"""
         org = models.Organization.query.filter_by(id=org_uuid).one()
         levels = models.Level.query.filter_by(organization_id=org_uuid).all()
         levels.sort(key=lambda x: x.cutoff)

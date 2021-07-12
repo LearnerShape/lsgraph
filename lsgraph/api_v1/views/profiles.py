@@ -180,14 +180,18 @@ def add_skills(org_id, profile_id, skill_map):
 class ProfilesAPI(MethodView):
     @api.response(200, ProfileManySchema)
     def get(self, org_uuid):
-        """Get profiles"""
+        """Get profiles
+
+        Get a list of all profile for an organization"""
         profiles = get_profiles(org_uuid)
         return {"profiles": profiles}
 
     @api.arguments(ProfileSchema, location="json")
     @api.response(200, ProfileSchema)
     def post(self, profile_data, org_uuid):
-        """Add profile"""
+        """Add profile
+
+        Add a new profile for the organization"""
         new_profile = create_new_profile(org_uuid, profile_data)
         return new_profile
 
@@ -196,13 +200,17 @@ class ProfilesAPI(MethodView):
 class ProfilesDetailAPI(MethodView):
     @api.response(200, ProfileSchema)
     def get(self, org_uuid, profile_uuid):
-        """Get profile details"""
+        """Get profile details
+
+        Get detailed information on a specific profile"""
         profile = get_profile(org_uuid, profile_uuid)
         return profile
 
     @api.response(204)
     def delete(self, org_uuid, profile_uuid):
-        """Delete profile"""
+        """Delete profile
+
+        Delete a specific profile from the organization"""
         profile = models.Profile.query.filter_by(
             organization_id=org_uuid, id=profile_uuid
         ).one()
@@ -217,14 +225,18 @@ class ProfilesDetailAPI(MethodView):
 class ProfileSkillsAPI(MethodView):
     @api.response(200, ProfileSkillsSchema)
     def get(self, org_uuid, profile_uuid):
-        """Get profile skills"""
+        """Get profile skills
+
+        Get a list for skills for a specific profile"""
         skills = get_profile(org_uuid, profile_uuid)["skills"]
         return {"skills": skills}
 
     @api.arguments(ProfileSkillsSchema, location="json")
     @api.response(200, ProfileSkillsSchema)
     def post(self, skills_data, org_uuid, profile_uuid):
-        """Update profile skills"""
+        """Update profile skills
+
+        Update the skills or skill levels for a specific profile"""
         profile = models.Profile.query.filter_by(
             organization_id=org_uuid, id=profile_uuid
         ).one()
@@ -237,7 +249,9 @@ class ProfileSkillsAPI(MethodView):
 class ProfileSkillsDetailAPI(MethodView):
     @api.response(204)
     def delete(self, org_uuid, profile_uuid, skill_uuid):
-        """Delete profile skills"""
+        """Delete profile skills
+
+        Delete a specific skill from a profile"""
         skill = (
             models.ProfileSkill.query.filter_by(profile_id=profile_uuid)
             .filter_by(skill_id=skill_uuid)

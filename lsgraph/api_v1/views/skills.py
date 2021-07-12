@@ -167,7 +167,9 @@ def get_skill_details(skill_ids):
 class SkillsAPI(MethodView):
     @api.response(200, SkillManySchema)
     def get(self, org_uuid):
-        """Get skills"""
+        """Get skills
+
+        Get a list of all skills for the organization"""
         root_skill = (
             models.Skill.query.filter(
                 models.Skill.id == models.Organization.root_skill_id
@@ -185,7 +187,9 @@ class SkillsAPI(MethodView):
     @api.arguments(SkillSchema, location="json")
     @api.response(200, SkillSchema)
     def post(self, skill_data, org_uuid):
-        """Add skills"""
+        """Add a skill
+
+        Add a new skill for the organization"""
         new_skill = create_new_skill(skill_data)
         return new_skill
 
@@ -194,10 +198,14 @@ class SkillsAPI(MethodView):
 class SkillsDetailAPI(MethodView):
     @api.response(200, SkillSchema)
     def get(self, org_uuid, skill_uuid):
-        """Get skill details"""
+        """Get skill details
+
+        Get detailed information on a specific skill"""
         abort(500)
 
-    @api.response(204)
-    def delete(self, org_uuid, skill_uuid):
-        """Delete skill"""
-        abort(500)
+    # @api.response(204)
+    # def delete(self, org_uuid, skill_uuid):
+    #     """Delete skill
+
+    #     Delete a specific skill"""
+    #     abort(500)
