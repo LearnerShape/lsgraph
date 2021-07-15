@@ -2,16 +2,27 @@
 
 **The public-api branch is in the early stages of development. Documentation, including this README, may not match code functionality**
 
+**The head of this branch may not be in a working state and changes breaking backwards compatibility are likely** 
+
 lsgraph was created with the aim of supporting reskilling and upskilling for both organisations and individuals, using machine learning and other data science methods. Over time, we plan to include in lsgraph a steadily increasing set of services for this purpose. 
 
-lsgraph currently provides services to:
-* collect course details
-* associate learning resources with skills
-* recommend learning resources for a learner based on target skills
-* recommend suitable job profiles based on current skills
-* suggest reskilling options for target jobs across a workforce. 
+The update of lsgraph in this branch is intended to separate the services provided by lsgraph from the frontend web application created for and run at [learnershape.com](https://www.learnershape.com/).
 
-This project was released by [LearnerShape](https://www.learnershape.com), which uses these services to provide reskilling and upskilling services through a user-facing website.
+Functionality being added includes:
+* Skill creation and graph modification
+* Learning resource management
+* User management
+* Group creation and management
+* Resource collections
+* "Online" application of machine learning models
+
+Existing functionality will also be moved and improved:
+* Learning resource recommendation
+* Job recommendation
+* Workforce planning
+ 
+
+# Background
 
 lsgraph is interacted with programmatically. This is ideal for research or building functionality into a larger project.
 
@@ -42,32 +53,13 @@ If you are unfamiliar with using a terminal or command line these guides for [Li
 
 Notebooks are available demonstrating the lsgraph functionality. These require jupyter to run. If you have Python installed running `pip install jupyter` should be sufficient. If you do not have a version of Python installed, the [Ananconda distribution](https://www.anaconda.com/products/individual) is recommended.
 
-## Before first running
-
-Using the terminal, navigate to the lsgraph directory and start the database:
-
-`docker-compose up lsdatabase`
-
-While the database is running this will print any logs. Start a new terminal, navigate to the lsgraph directory again and set up the initial database:
-
-`docker exec -i lsgraph_lsdatabase_1 psql -U postgres postgres < schema.sql`
-
-If you are using PowerShell on Windows the above command will cause an error. Piping `<` is not supported in the same way. This can be resolved by first moving the schema.sql file into the running container, and then initializing the database.
-Move schema.sql:
-`docker cp schema.sql lsgraph_lsdatabase_1:schema.sql`
-Connect to container:
-`docker exec -it lsgraph_lsdatabase_1 /bin/bash`
-Initialize database:
-`psql -U postgres postgres < schema.sql`
-Then exit the container with Ctrl-D.
-
 ## First run
 
-In the terminal running the database press Ctrl-C to stop it. Then, run both the database and lsgraph web application with:
+Using the terminal, navigate to the lsgraph directory and start all services:
 
 `docker-compose up --build`
 
-The service is then available at http://localhost:5000/
+The lsgraph API is then available at http://localhost:5000/
 
 ## Interacting with the service
 
@@ -83,39 +75,6 @@ These can be run using jupyter. In a terminal navigate to the notebooks director
 `jupyter notebook`
 
 This will open a web browser window with the notebooks available. If using jupyter for the first time this [tutorial](https://www.dataquest.io/blog/jupyter-notebook-tutorial/) may be useful.
-
-## Loading courses and scoring
-
-Courses are collected from providers and scored against skills using a command line interface.
-
-A sample configuration file is included at cli/config.json for the test organisation created in the notebooks above. A crawler for [Pluralsight](https://www.pluralsight.com/) is also included.
-
-The program is structured to facilitate easily creating crawlers for other services. Common functionality is encapsulated into generic crawler classes. When creating a new crawler they inherit from the generic classes. See `cli/plugins/crawlers/pluralsight.py` for an example.
-
-To crawl all providers for the test organisation created in the notebooks:
-
-`python ls.py --config=cli/config.json --env=testing crawl --organisation Test`
-
-The above command can be run from the host or the docker container. The following commands connect to the database and if using the testing environment must be run from within the docker container. Instead, the testing-host environment is used enabling the commands to be run from the host.
-
-The courses can be scored against the skill graph:
-
-`python ls.py --config=cli/config.json --env=testing-host classify --organisation Test --model=simple`
-
-As with crawlers, new models can also be easily created. The simple model used above can be seen at `cli/plugins/models/simple.py`.
-
-Next, courses and scores can be loaded into the database:
-
-`python ls.py --config=cli/config.json --env=testing-host load --organisation=Test --courses --model=simple`
-
-A vector representation for each skill is used during job recommendation. The packages required must first be installed by running:
-
-`pip install -r requirements-model.txt`
-
-The vector embeddings can then be generated with:
-
-`python ls.py --config=cli/config.json --env=testing-host embed --organisation=Test`
-
 
 # Contributing
 
