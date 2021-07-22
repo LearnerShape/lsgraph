@@ -22,7 +22,13 @@ import pdb
 from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
-from lsgraph.api_v1.schemas import OrganizationSchema, OrganizationManySchema
+from lsgraph.api_v1.schemas import (
+    OrganizationSchema,
+    OrganizationManySchema,
+    WorkforcePlanningQuerySchema,
+    WorkforcePlanningSchema,
+)
+from lsgraph.api_v1.views.users import JobRecommendation
 
 
 def create_root_skill():
@@ -63,6 +69,147 @@ def create_new_organization(org_data):
     return output
 
 
+def get_source_profiles(query_data, org_id):
+    """Expand groups into users/source profiles"""
+    if query_data.get("groups"):
+        member_profiles = (
+            models.Profile.query.filter(
+                models.Profile.user_id == models.GroupMember.user_id
+            )
+            .filter(models.GroupMember.group_id.in_(query_data["groups"]))
+            .filter(models.GroupMember.group_id == models.Group.id)
+            .filter(models.Group.organization_id == org_id)
+            .all()
+        )
+        return member_profiles
+    user_profiles = (
+        models.Profile.query.filter(models.Profile.organization_id == org_id)
+        .filter(models.Profile.user_id.in_(query_data["users"]))
+        .all()
+    )
+    return user_profiles
+
+
+def collect_profile_information(query_data, source_profiles, org_id):
+    """Get all needed profile information"""
+    target_profile_ids = [i["profile"] for i in query_data["targets"]]
+    target_profiles = (
+        models.Profile.query.filter(models.Profile.organization_id == org_id)
+        .filter(models.Profile.id.in_(target_profile_ids))
+        .all()
+    )
+    profile_ids = [i.id for i in target_profiles]
+    # Check that profiles belong to organization
+    for i in target_profile_ids:
+        if i not in profile_ids:
+            abort(403)
+    profile_ids.extend([i.id for i in source_profiles])
+    profile_ids = list(set(profile_ids))
+    profile_skills = models.ProfileSkill.query.filter(
+        models.ProfileSkill.profile_id.in_(profile_ids)
+    ).all()
+    skill_ids = [i.skill_id for i in profile_skills]
+    skill_ids = list(set(skill_ids))
+    skills = models.Skill.query.filter(models.Skill.id.in_(skill_ids)).all()
+    return target_profiles, profile_skills, skills
+
+
+class WorkforcePlanner:
+    """Optimize upskilling opportunities across a workforce"""
+
+    def __init__(self):
+        """Set initialization values for planning"""
+        self.employees = []
+        self.targets = []
+
+    def add_employee(self, identifier):
+        self.employees.append(identifier)
+
+    def add_target(self, target):
+        self.targets.append(target)
+
+    def plan(self, job_rec):
+        """Plan best target profiles for each employee"""
+        distances = []
+        employee_options = [0 for _ in range(len(self.employees))]
+        target_options = [0 for _ in range(len(self.targets))]
+        # Get distances
+        distance_lookup = {}
+        fit_lookup = {}
+        for e_idx, e in enumerate(self.employees):
+            distance_lookup[e] = {i["profile"]["id"]: i["distance"] for i in job_rec[e]}
+            fit_lookup[e.user_id] = {i["profile"]["id"]: i["fit"] for i in job_rec[e]}
+
+            for t_idx, t in enumerate(self.targets):
+                d = distance_lookup[e][t["profile"]]
+                if d > t["max_training"]:
+                    continue
+                distances.append((e_idx, t_idx, d))
+                employee_options[e_idx] += 1
+                target_options[t_idx] += 1
+        distances.sort(key=lambda x: x[2], reverse=True)
+        # Prune connections
+        preserved_distances = []
+        for d in distances:
+            if (employee_options[d[0]] > len(self.targets)) and (
+                target_options[d[1]] > self.targets[d[1]]["number_needed"]
+            ):
+                employee_options[d[0]] -= 1
+                target_options[d[1]] -= 1
+                continue
+            preserved_distances.append(d)
+        # Build results
+        employee_targets = {
+            i.user_id: {"user": i.user_id, "recommendations": []}
+            for i in self.employees
+        }
+        target_employees = {
+            i["profile"]: {"profile": i["profile"], "recommendations": []}
+            for i in self.targets
+        }
+        for e_idx, t_idx, d in preserved_distances:
+            e_id = self.employees[e_idx].user_id
+            t_id = self.targets[t_idx]["profile"]
+            employee_targets[e_id]["recommendations"].append(
+                {"profile": t_id, "distance": d, "fit": fit_lookup[e_id][t_id]}
+            )
+            target_employees[t_id]["recommendations"].append(
+                {"user": e_id, "distance": d, "fit": fit_lookup[e_id][t_id]}
+            )
+        for i in employee_targets:
+            employee_targets[i]["recommendations"].sort(key=lambda x: x["distance"])
+        for i in target_employees:
+            target_employees[i]["recommendations"].sort(key=lambda x: x["distance"])
+        return {
+            "targets_by_user": employee_targets.values(),
+            "users_by_target": target_employees.values(),
+        }
+
+
+def workforce_plan(query_data, org_id):
+    """Create a workforce reskilling plan"""
+    source_profiles = get_source_profiles(query_data, org_id)
+    profiles, profile_skills, skills = collect_profile_information(
+        query_data, source_profiles, org_id
+    )
+    levels = models.Level.query.filter_by(organization_id=org_id).all()
+    levels = [(i.name, i.cutoff) for i in levels]
+    levels.sort(key=lambda x: x[1])
+    recommendation = JobRecommendation(levels)
+    results = {}
+    for source in source_profiles:
+        results[source] = recommendation.multiple_jobs_by_distance(
+            source, profiles, profile_skills, skills
+        )
+    workforce_planner = WorkforcePlanner()
+    for source in source_profiles:
+        workforce_planner.add_employee(source)
+    for target in query_data["targets"]:
+        workforce_planner.add_target(target)
+    output_plan = workforce_planner.plan(results)
+    return output_plan
+
+
 @api.route("organizations/")
 class OrganizationsAPI(MethodView):
     @api.response(200, OrganizationManySchema)
@@ -100,7 +247,22 @@ class OrganizationsDetailAPI(MethodView):
         }
         return output
 
-    @api.response(204)
-    def delete(self, org_uuid):
-        """Delete organization"""
-        abort(500)
+    # @api.response(204)
+    # def delete(self, org_uuid):
+    #     """Delete organization
+
+    #     Delete a specific organization from the customer account"""
+    #     abort(500)
+
+
+@api.route("organizations/<org_uuid>/workforce_planning/")
+class WorkforcePlanningAPI(MethodView):
+    @api.arguments(WorkforcePlanningQuerySchema, location="json")
+    @api.response(200, WorkforcePlanningSchema)
+    def post(self, workforce_planning, org_uuid):
+        """Workforce plan
+
+        Create a workforce plan optimizing job recommendations
+        across the organization"""
+        plan = workforce_plan(workforce_planning, org_uuid)
+        return plan

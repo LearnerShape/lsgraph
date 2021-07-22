@@ -91,7 +91,7 @@ def get_profiles(org_uuid, types=None, user=False):
     )
     if types:
         profiles_query = profiles_query.filter(models.Profile.type.in_(types))
-    if user:
+    elif user:
         profiles_query = profiles_query.filter(models.Profile.user_id.isnot(None))
     else:
         profiles_query = profiles_query.filter(models.Profile.user_id.is_(None))
@@ -113,6 +113,7 @@ def create_new_profile(org_uuid, profile_data):
         description=profile_data["description"],
         organization_id=org_uuid,
         type=profile_data["type"],
+        user_id=profile_data.get("user_id"),
     )
     db.session.add(new_profile)
     db.session.commit()

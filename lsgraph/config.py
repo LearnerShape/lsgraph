@@ -5,7 +5,9 @@ ENV = "development"
 SECRET_KEY = "DEVELOPMENT"
 
 # Database config
-SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI", "postgresql://postgres@localhost:5432/postgres")
+SQLALCHEMY_DATABASE_URI = os.environ.get(
+    "SQLALCHEMY_DATABASE_URI", "postgresql://postgres@localhost:5432/postgres"
+)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # Documentation config

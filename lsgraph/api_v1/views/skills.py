@@ -36,7 +36,7 @@ def create_new_skill(skill_data):
     if (skill_data["parent"] != root_skill_id) and root_skills.get(
         skill_data["parent"], False
     ) != root_skill_id:
-        return Exception("Skill is not valid for organization")
+        raise Exception("Skill is not valid for organization")
     creator_id = None
     if skill_data.get("creator", False):
         creator_id = skill_data["creator"]["id"]

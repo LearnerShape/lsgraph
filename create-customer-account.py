@@ -14,25 +14,25 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from .error import handle_error
-from .organizations import (
-    OrganizationsAPI,
-    OrganizationsDetailAPI,
-    WorkforcePlanningAPI,
-)
 
-# from .graphs import GraphsAPI, GraphsDetailAPI
-from .skills import SkillsAPI, SkillsDetailAPI
+import click
+from sqlalchemy.exc import IntegrityError
+from test.conftest import create_customer
 
-# from .resources import ResourcesAPI, ResourcesDetailAPI
-from .groups import GroupsAPI, GroupsDetailAPI, GroupMembersAPI, GroupMembersDetailAPI
+@click.command()
+@click.argument("name")
+@click.argument("email")
+def customer_account(name, email):
+    """Create a customer account"""
+    try:
+        customer_id, access_id, access_secret = create_customer(name, email)
+        click.echo(f"Customer ID: {customer_id}")
+        click.echo(f"API Key: {access_id}")
+        click.echo(f"Access Token: {access_secret}")
+    except IntegrityError as err:
+        click.echo("Duplicate key error")
+        click.echo(err.orig)
 
-# from .collections import CollectionsAPI, CollectionsDetailAPI, CollectionResourcesAPI
-# from .pathways import PathwaysAPI, PathwaysDetailAPI
-from .users import UsersAPI, UsersDetailAPI, JobRecommendationAPI
-from .profiles import (
-    ProfilesAPI,
-    ProfilesDetailAPI,
-    ProfileSkillsAPI,
-    ProfileSkillsDetailAPI,
-)
+
+if __name__ == "__main__":
+    customer_account()

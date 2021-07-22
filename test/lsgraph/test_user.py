@@ -47,5 +47,6 @@ def test_users_post(lsgraph_client, test_data_2org):
         "id",
         "name",
         "email",
+        "profile",
     ]:
         assert i in response.json.keys()

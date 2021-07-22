@@ -47,3 +47,4 @@ def test_skill_post(lsgraph_client, test_data_2org):
         json={"name": "Skill 1", "description": "A new skill", "parent": root_skill_id},
     )
     assert response.status_code == 200
+    assert response.json["name"] == "Skill 1"

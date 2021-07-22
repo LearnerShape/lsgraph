@@ -78,13 +78,15 @@ def test_profile_post_outside_org_skill(lsgraph_client, test_data_2org):
     assert response.status_code == 403
 
 
-def create_profile(lsgraph_client, org_details, profile_name=None, skills=[]):
+def create_profile(
+    lsgraph_client, org_details, profile_name=None, skills=[], profile_type="job role"
+):
     """Create a profile"""
     (customer_id, access_id, access_secret), org, collection = org_details
     org_id = org["id"]
     time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
     if not profile_name:
-        profile_name = f"group_{time}"
+        profile_name = f"profile_{time}"
     profile = {
         "name": profile_name,
         "description": f"Description for {profile_name}",
