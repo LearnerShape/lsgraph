@@ -13,28 +13,29 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
 
-from . import db
+from marshmallow import fields, ValidationError
+
+from .shared import OrderedBaseSchema
+from .skill import SkillSchema
 
 
-class Provider(db.Model):
-    """Provider of learning resources
-
-    Additional details on providers"""
-
-    id = db.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        unique=True,
-        nullable=False,
+class OrganizationSchema(OrderedBaseSchema):
+    id = fields.UUID(dump_only=True)
+    name = fields.String()
+    root_skill = fields.Nested(SkillSchema(only=("id",)), dump_only=True)
+    level_map = fields.Mapping(
+        fields.String,
+        fields.Float,
+        missing={
+            "No knowledge": 0.0,
+            "Beginner": 1.0,
+            "Intermediate": 2.0,
+            "Advanced": 3.0,
+            "Expert": 4.0,
+        },
     )
-    name = db.Column(db.String(256))
-    description = db.Column(db.Text)
-    logo = db.Column(db.Text)
-    url = db.Column(db.Text)
-    organization_id = db.Column(
-        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
-    )
+
+
+class OrganizationManySchema(OrderedBaseSchema):
+    organizations = fields.List(fields.Nested(lambda: OrganizationSchema))

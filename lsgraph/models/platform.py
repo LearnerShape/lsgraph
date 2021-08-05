@@ -38,3 +38,6 @@ class Platform(db.Model):
     url = db.Column(db.Text)
     subscription = db.Column(db.Numeric)
     free_trial = db.Column(db.Boolean)
+    organization_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
+    )

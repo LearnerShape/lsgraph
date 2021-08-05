@@ -52,3 +52,7 @@ class Offering(db.Model):
     certificate = db.Column(db.Boolean)
     quality = db.Column(db.Float)
     instructors = db.Column(db.Text)
+    organization_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
+    )
+    retired = db.Column(db.Boolean)

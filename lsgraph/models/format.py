@@ -35,3 +35,6 @@ class Format(db.Model):
     name = db.Column(db.String(128))
     description = db.Column(db.Text)
     logo = db.Column(db.Text)
+    organization_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
+    )

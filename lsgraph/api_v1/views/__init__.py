@@ -24,7 +24,11 @@ from .organizations import (
 # from .graphs import GraphsAPI, GraphsDetailAPI
 from .skills import SkillsAPI, SkillsDetailAPI
 
-# from .resources import ResourcesAPI, ResourcesDetailAPI
+from .resources import ResourcesAPI, ResourcesDetailAPI, ResourceOfferingsAPI
+from .platforms import PlatformsAPI, PlatformsDetailAPI
+from .formats import FormatsAPI, FormatsDetailAPI
+from .providers import ProvidersAPI, ProvidersDetailAPI
+
 from .groups import GroupsAPI, GroupsDetailAPI, GroupMembersAPI, GroupMembersDetailAPI
 
 # from .collections import CollectionsAPI, CollectionsDetailAPI, CollectionResourcesAPI

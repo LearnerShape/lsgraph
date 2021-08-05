@@ -13,28 +13,28 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
 
-from . import db
+from marshmallow import fields, ValidationError
+
+from .shared import OrderedBaseSchema
+from .user import UserSchema
 
 
-class Provider(db.Model):
-    """Provider of learning resources
+class GroupMemberSchema(OrderedBaseSchema):
+    id = fields.UUID()
+    name = fields.String()
 
-    Additional details on providers"""
 
-    id = db.Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        unique=True,
-        nullable=False,
-    )
-    name = db.Column(db.String(256))
-    description = db.Column(db.Text)
-    logo = db.Column(db.Text)
-    url = db.Column(db.Text)
-    organization_id = db.Column(
-        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
-    )
+class GroupSchema(OrderedBaseSchema):
+    id = fields.UUID(dump_only=True)
+    name = fields.String()
+    whole_organization = fields.Boolean(missing=False)
+    members = fields.List(fields.Nested(lambda: GroupMemberSchema()), missing=[])
+
+
+class GroupManySchema(OrderedBaseSchema):
+    groups = fields.List(fields.Nested(lambda: GroupSchema))
+
+
+class GroupMembersSchema(OrderedBaseSchema):
+    members = fields.List(fields.Nested(lambda: GroupMemberSchema()))

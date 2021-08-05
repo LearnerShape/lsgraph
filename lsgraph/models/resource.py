@@ -47,3 +47,6 @@ class Resource(db.Model):
     prerequisite_knowledge = db.Column(db.Text)
     retired = db.Column(db.Boolean)
     resource_recommendation_vector = db.Column(ARRAY(db.Float))
+    organization_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
+    )
