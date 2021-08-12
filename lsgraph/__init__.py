@@ -49,7 +49,18 @@ def create_app(test_config=None):
     models.db.init_app(app)
     migrate = Migrate(app, models.db)
 
-    api = Api(app, spec_kwargs={"security": [{"APIKey": [], "AuthToken": []}]})
+    api = Api(
+        app,
+        spec_kwargs={
+            "security": [{"APIKey": [], "AuthToken": []}],
+            "servers": [
+                {
+                    "url": "https://www.learnershape.com",
+                    "description": "Learnershape hosted service",
+                }
+            ],
+        },
+    )
 
     api.spec.components.security_scheme(
         "APIKey", {"type": "apiKey", "in": "header", "name": "X-API-Key"}
