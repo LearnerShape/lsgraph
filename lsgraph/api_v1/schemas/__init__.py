@@ -16,7 +16,7 @@
 
 from marshmallow import ValidationError
 
-from .skill import SkillSchema, SkillManySchema
+from .skill import SkillQuerySchema, SkillSchema, SkillManySchema
 from .user import UserSchema, UserManySchema
 from .organization import OrganizationSchema, OrganizationManySchema
 from .profile import (
@@ -40,7 +40,12 @@ from .workforce_planning import (
     WorkforcePlanningUserResultSchema,
     WorkforcePlanningSchema,
 )
-from .resource import NewResourceSchema, ResourceSchema, ResourceManySchema
+from .resource import (
+    ResourceQuerySchema,
+    NewResourceSchema,
+    ResourceSchema,
+    ResourceManySchema,
+)
 from .platform import PlatformSchema, PlatformManySchema
 from .provider import ProviderSchema, ProviderManySchema
 from .format import FormatSchema, FormatManySchema

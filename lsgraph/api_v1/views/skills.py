@@ -23,7 +23,7 @@ import pdb
 from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
-from lsgraph.api_v1.schemas import SkillSchema, SkillManySchema
+from lsgraph.api_v1.schemas import SkillQuerySchema, SkillSchema, SkillManySchema
 from ._shared import authorized_org
 
 
@@ -168,6 +168,7 @@ def get_skill_details(skill_ids):
 class SkillsAPI(MethodView):
     decorators = [authorized_org]
 
+    @api.arguments(SkillQuerySchema, location="query")
     @api.response(200, SkillManySchema)
     def get(self, org_uuid):
         """Get skills

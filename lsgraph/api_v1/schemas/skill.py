@@ -20,6 +20,10 @@ from .shared import OrderedBaseSchema
 from .user import UserSchema
 
 
+class SkillQuerySchema(OrderedBaseSchema):
+    query = fields.String()
+
+
 class SkillSchema(OrderedBaseSchema):
     id = fields.UUID(dump_only=True)
     name = fields.String(required=True)

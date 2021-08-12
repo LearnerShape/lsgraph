@@ -24,6 +24,7 @@ from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
 from lsgraph.api_v1.schemas import (
+    ResourceQuerySchema,
     NewResourceSchema,
     ResourceSchema,
     ResourceManySchema,
@@ -215,6 +216,7 @@ def create_new_offering(offering_data, org_uuid, resource_uuid):
 class ResourcesAPI(MethodView):
     decorators = [authorized_org]
 
+    @api.arguments(ResourceQuerySchema, location="query")
     @api.response(200, ResourceManySchema)
     def get(self, org_uuid):
         """Get resources

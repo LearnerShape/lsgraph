@@ -22,6 +22,12 @@ from .platform import PlatformSchema
 from .provider import ProviderSchema
 
 
+class ResourceQuerySchema(OrderedBaseSchema):
+    query = fields.String()
+    user = fields.UUID()
+    skill = fields.UUID()
+
+
 class NewResourceSchema(OrderedBaseSchema):
     id = fields.UUID()
     name = fields.String(required=True)
