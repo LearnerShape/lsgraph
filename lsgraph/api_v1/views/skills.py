@@ -170,7 +170,7 @@ class SkillsAPI(MethodView):
 
     @api.arguments(SkillQuerySchema, location="query")
     @api.response(200, SkillManySchema)
-    def get(self, org_uuid):
+    def get(self, query_data, org_uuid):
         """Get skills
 
         Get a list of all skills for the organization"""

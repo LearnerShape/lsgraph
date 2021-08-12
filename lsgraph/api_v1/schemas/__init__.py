@@ -50,3 +50,11 @@ from .platform import PlatformSchema, PlatformManySchema
 from .provider import ProviderSchema, ProviderManySchema
 from .format import FormatSchema, FormatManySchema
 from .offering import NewOfferingSchema, OfferingSchema, OfferingManySchema
+from .collection import (
+    CollectionResourceSchema,
+    CollectionMemberSchema,
+    CollectionSchema,
+    CollectionManySchema,
+    CollectionResourcesSchema,
+    CollectionMembersSchema,
+)

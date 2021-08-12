@@ -18,6 +18,12 @@ from flask.views import MethodView
 import pdb
 
 from lsgraph.api_v1 import api
+from lsgraph.api_v1.schemas import (
+    CollectionManySchema,
+    CollectionSchema,
+    CollectionResourcesSchema,
+    CollectionMembersSchema,
+)
 from ._shared import authorized_org
 
 
@@ -34,7 +40,7 @@ class CollectionsAPI(MethodView):
         return "Hello"
 
     @api.arguments(CollectionSchema, location="json")
-    @api.response(CollectionSchema, location="json")
+    @api.response(200, CollectionSchema)
     def post(self, collection_data, org_uuid):
         """Add collection
 

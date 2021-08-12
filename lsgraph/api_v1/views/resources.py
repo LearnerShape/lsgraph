@@ -218,7 +218,7 @@ class ResourcesAPI(MethodView):
 
     @api.arguments(ResourceQuerySchema, location="query")
     @api.response(200, ResourceManySchema)
-    def get(self, org_uuid):
+    def get(self, query_data, org_uuid):
         """Get resources
 
         Get a list of all resources for an organization
