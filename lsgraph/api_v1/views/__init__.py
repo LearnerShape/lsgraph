@@ -31,7 +31,15 @@ from .providers import ProvidersAPI, ProvidersDetailAPI
 
 from .groups import GroupsAPI, GroupsDetailAPI, GroupMembersAPI, GroupMembersDetailAPI
 
-# from .collections import CollectionsAPI, CollectionsDetailAPI, CollectionResourcesAPI
+from .collections import (
+    CollectionsAPI,
+    CollectionsDetailAPI,
+    CollectionResourcesAPI,
+    CollectionResourcesDetailAPI,
+    CollectionMembersAPI,
+    CollectionMembersDetailAPI,
+)
+
 # from .pathways import PathwaysAPI, PathwaysDetailAPI
 from .users import UsersAPI, UsersDetailAPI, JobRecommendationAPI
 from .profiles import (

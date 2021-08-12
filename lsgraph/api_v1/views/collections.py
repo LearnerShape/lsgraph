@@ -15,73 +15,129 @@
 
 
 from flask.views import MethodView
+import pdb
+
+from lsgraph.api_v1 import api
+from ._shared import authorized_org
 
 
+@api.route("organizations/<org_uuid>/collections/")
 class CollectionsAPI(MethodView):
+    decorators = [authorized_org]
+
+    @api.response(200, CollectionManySchema)
     def get(self, org_uuid=None):
-        """Collections endpoint
+        """Get collections
 
-        .. :quickref: Get collections
-
+        Get a list of all collections for an organization
         """
         return "Hello"
 
-    def post(self, org_uuid=None):
-        """Collection creation endpoint
+    @api.arguments(CollectionSchema, location="json")
+    @api.response(CollectionSchema, location="json")
+    def post(self, collection_data, org_uuid):
+        """Add collection
 
-        .. :quickref: Create new collection
-
+        Create a new collection for an organization
         """
         return "Hello"
 
 
+@api.route("organizations/<org_uuid>/collections/<collection_uuid>/")
 class CollectionsDetailAPI(MethodView):
-    def get(self, collection_uuid, org_uuid=None):
-        """Collection detail endpoint
+    decorators = [authorized_org]
 
-        .. :quickref: Get collection detail
+    @api.response(200, CollectionSchema)
+    def get(self, org_uuid, collection_uuid):
+        """Get collection details
 
+        Get detailed information on a specific collection
         """
         return "Hello"
 
-    def put(self, collection_uuid, org_uuid=None):
-        """Collection update endpoint
+    @api.response(204)
+    def delete(self, org_uuid, collection_uuid):
+        """Delete collection
 
-        .. :quickref: Update collection
-
-        """
-        return "Hello"
-
-    def delete(self, collection_uuid, org_uuid=None):
-        """Collection deletion endpoint
-
-        .. :quickref: Delete collection
+        Delete a collection from an organization
 
         """
         return "Hello"
 
 
+@api.route("organizations/<org_uuid>/collections/<collection_uuid>/resources/")
 class CollectionResourcesAPI(MethodView):
-    def get(self, collection_uuid, org_uuid=None):
-        """Collection resources endpoint
+    decorators = [authorized_org]
 
-        .. :quickref: Get collection resources
+    @api.response(200, CollectionResourcesSchema)
+    def get(self, org_uuid, collection_uuid):
+        """Get collection resources
+
+        Get a list of resources for a specific collection
+        """
+        return "Hello"
+
+    @api.arguments(CollectionResourcesSchema, location="json")
+    @api.response(200, CollectionResourcesSchema)
+    def post(self, resource_data, org_uuid, collection_uuid):
+        """Update collection resources
+
+        Add additional resources to a specific collection
 
         """
         return "Hello"
 
-    def put(self, collection_uuid, org_uuid=None):
-        """Collection resources update endpoint
 
-        .. :quickref: Update collection resources
+@api.route(
+    "organizations/<org_uuid>/collections/<collection_uuid>/resources/<resource_uuid>/"
+)
+class CollectionResourcesDetailAPI(MethodView):
+    decorators = [authorized_org]
+
+    @api.response(204)
+    def delete(self, org_uuid, collection_uuid, resource_uuid):
+        """Delete collection resource
+
+        Delete a specific resource from a collection
 
         """
         return "Hello"
 
-    def delete(self, collection_uuid, org_uuid=None):
-        """Collection resources deletion endpoint
 
-        .. :quickref: Delete collection resources
+@api.route("organizations/<org_uuid>/collections/<collection_uuid>/members/")
+class CollectionMembersAPI(MethodView):
+    decorators = [authorized_org]
+
+    @api.response(200, CollectionMembersSchema)
+    def get(self, org_uuid, collection_uuid):
+        """Get collection members
+
+        Get a list of members for a specific collection
+        """
+        return "Hello"
+
+    @api.arguments(CollectionMembersSchema, location="json")
+    @api.response(200, CollectionMembersSchema)
+    def post(self, member_data, org_uuid, collection_uuid):
+        """Update collection members
+
+        Add additional members to a specific collection
+
+        """
+        return "Hello"
+
+
+@api.route(
+    "organizations/<org_uuid>/collections/<collection_uuid>/members/<member_uuid>/"
+)
+class CollectionMembersDetailAPI(MethodView):
+    decorators = [authorized_org]
+
+    @api.response(204)
+    def delete(self, org_uuid, collection_uuid, member_uuid):
+        """Delete collection member
+
+        Delete a specific member from a collection
 
         """
         return "Hello"
