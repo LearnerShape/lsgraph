@@ -24,6 +24,7 @@ from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
 from lsgraph.api_v1.schemas import GroupSchema, GroupManySchema, GroupMembersSchema
+from ._shared import authorized_org
 
 
 def create_new_group(group_data, org_uuid):
@@ -106,6 +107,8 @@ def get_group_members(org_id, group_id):
 
 @api.route("organizations/<org_uuid>/groups/")
 class GroupsAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, GroupManySchema)
     def get(self, org_uuid):
         """Get groups
@@ -126,6 +129,8 @@ class GroupsAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/groups/<group_uuid>/")
 class GroupsDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, GroupSchema)
     def get(self, org_uuid, group_uuid):
         """Get group details
@@ -151,6 +156,8 @@ class GroupsDetailAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/groups/<group_uuid>/members/")
 class GroupMembersAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, GroupMembersSchema)
     def get(self, org_uuid, group_uuid):
         """Get group members
@@ -172,6 +179,8 @@ class GroupMembersAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/groups/<group_uuid>/members/<user_uuid>/")
 class GroupMembersDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(204)
     def delete(self, org_uuid, group_uuid, user_uuid):
         """Delete group member

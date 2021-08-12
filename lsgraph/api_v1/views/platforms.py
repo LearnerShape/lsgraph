@@ -24,6 +24,7 @@ from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
 from lsgraph.api_v1.schemas import PlatformSchema, PlatformManySchema
+from ._shared import authorized_org
 
 
 def create_new_platform(platform_data, org_uuid):
@@ -44,6 +45,8 @@ def create_new_platform(platform_data, org_uuid):
 
 @api.route("organizations/<org_uuid>/platforms/")
 class PlatformsAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, PlatformManySchema)
     def get(self, org_uuid):
         """Get platforms
@@ -68,6 +71,8 @@ class PlatformsAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/platforms/<platform_uuid>/")
 class PlatformsDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, PlatformSchema)
     def get(self, org_uuid, platform_uuid):
         """Get platform details

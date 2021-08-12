@@ -24,6 +24,7 @@ from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
 from lsgraph.api_v1.schemas import ProviderSchema, ProviderManySchema
+from ._shared import authorized_org
 
 
 def create_new_provider(provider_data, org_uuid):
@@ -42,6 +43,8 @@ def create_new_provider(provider_data, org_uuid):
 
 @api.route("organizations/<org_uuid>/providers/")
 class ProvidersAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, ProviderManySchema)
     def get(self, org_uuid):
         """Get providers
@@ -66,6 +69,8 @@ class ProvidersAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/providers/<provider_uuid>/")
 class ProvidersDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, ProviderSchema)
     def get(self, org_uuid, provider_uuid):
         """Get provider details

@@ -24,6 +24,7 @@ from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
 from lsgraph.api_v1.schemas import FormatSchema, FormatManySchema
+from ._shared import authorized_org
 
 
 def create_new_format(format_data, org_uuid):
@@ -41,6 +42,8 @@ def create_new_format(format_data, org_uuid):
 
 @api.route("organizations/<org_uuid>/formats/")
 class FormatsAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, FormatManySchema)
     def get(self, org_uuid):
         """Get formats
@@ -65,6 +68,8 @@ class FormatsAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/formats/<format_uuid>/")
 class FormatsDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, FormatSchema)
     def get(self, org_uuid, format_uuid):
         """Get format details

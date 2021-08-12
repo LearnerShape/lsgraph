@@ -26,6 +26,7 @@ from lsgraph.models import db
 from lsgraph.api_v1 import api
 from lsgraph.api_v1.schemas import ProfileSchema, ProfileManySchema, ProfileSkillsSchema
 from lsgraph.api_v1.views.skills import get_root_id
+from ._shared import authorized_org
 
 
 def get_levels(org_uuid):
@@ -179,6 +180,8 @@ def add_skills(org_id, profile_id, skill_map):
 
 @api.route("organizations/<org_uuid>/profiles/")
 class ProfilesAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, ProfileManySchema)
     def get(self, org_uuid):
         """Get profiles
@@ -199,6 +202,8 @@ class ProfilesAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/profiles/<profile_uuid>/")
 class ProfilesDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, ProfileSchema)
     def get(self, org_uuid, profile_uuid):
         """Get profile details
@@ -224,6 +229,8 @@ class ProfilesDetailAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/profiles/<profile_uuid>/skills/")
 class ProfileSkillsAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, ProfileSkillsSchema)
     def get(self, org_uuid, profile_uuid):
         """Get profile skills
@@ -248,6 +255,8 @@ class ProfileSkillsAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/profiles/<profile_uuid>/skills/<skill_uuid>/")
 class ProfileSkillsDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(204)
     def delete(self, org_uuid, profile_uuid, skill_uuid):
         """Delete profile skills

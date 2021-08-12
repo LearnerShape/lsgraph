@@ -31,6 +31,7 @@ from lsgraph.api_v1.schemas import (
     OfferingSchema,
     OfferingManySchema,
 )
+from ._shared import authorized_org
 
 
 def prepare_provider(provider):
@@ -212,6 +213,8 @@ def create_new_offering(offering_data, org_uuid, resource_uuid):
 
 @api.route("organizations/<org_uuid>/resources/")
 class ResourcesAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, ResourceManySchema)
     def get(self, org_uuid):
         """Get resources
@@ -237,6 +240,8 @@ class ResourcesAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/resources/<resource_uuid>/")
 class ResourcesDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, ResourceSchema)
     def get(self, org_uuid, resource_uuid):
         """Get resource details
@@ -266,6 +271,8 @@ class ResourcesDetailAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/resources/<resource_uuid>/offerings/")
 class ResourceOfferingsAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.arguments(NewOfferingSchema, location="json")
     @api.response(200, OfferingSchema)
     def post(self, offering_data, org_uuid, resource_uuid):
@@ -282,6 +289,8 @@ class ResourceOfferingsAPI(MethodView):
     "organizations/<org_uuid>/resources/<resource_uuid>/offerings/<offering_uuid>/"
 )
 class ResourceOfferingDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(204)
     def delete(self, org_uuid, resource_uuid, offering_uuid):
         """Delete offering

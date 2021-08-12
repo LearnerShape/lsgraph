@@ -24,6 +24,7 @@ from lsgraph import models
 from lsgraph.models import db
 from lsgraph.api_v1 import api
 from lsgraph.api_v1.schemas import SkillSchema, SkillManySchema
+from ._shared import authorized_org
 
 
 def create_new_skill(skill_data):
@@ -165,6 +166,8 @@ def get_skill_details(skill_ids):
 
 @api.route("organizations/<org_uuid>/skills/")
 class SkillsAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, SkillManySchema)
     def get(self, org_uuid):
         """Get skills
@@ -196,6 +199,8 @@ class SkillsAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/skills/<skill_uuid>/")
 class SkillsDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, SkillSchema)
     def get(self, org_uuid, skill_uuid):
         """Get skill details

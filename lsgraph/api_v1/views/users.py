@@ -31,6 +31,7 @@ from lsgraph.api_v1.schemas import (
     JobRecommendationManySchema,
 )
 from lsgraph.api_v1.views.profiles import get_level_name
+from ._shared import authorized_org
 
 
 def create_new_user(user_data, org_uuid):
@@ -246,6 +247,8 @@ def get_user_details(org_id, user_id=None):
 
 @api.route("organizations/<org_uuid>/users/")
 class UsersAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, UserManySchema)
     def get(self, org_uuid):
         """Get users
@@ -266,6 +269,8 @@ class UsersAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/users/<user_uuid>/")
 class UsersDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, UserSchema)
     def get(self, org_uuid, user_uuid):
         """Get user details
@@ -288,6 +293,8 @@ class UsersDetailAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/users/<user_uuid>/job_recommendations/")
 class JobRecommendationAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.arguments(JobRecommendationQuerySchema, location="json")
     @api.response(200, JobRecommendationManySchema)
     def post(self, job_rec, org_uuid, user_uuid):

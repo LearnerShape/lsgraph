@@ -29,6 +29,7 @@ from lsgraph.api_v1.schemas import (
     WorkforcePlanningSchema,
 )
 from lsgraph.api_v1.views.users import JobRecommendation
+from ._shared import authorized_org
 
 
 def create_root_skill():
@@ -232,6 +233,8 @@ class OrganizationsAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/")
 class OrganizationsDetailAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.response(200, OrganizationSchema)
     def get(self, org_uuid):
         """Get organization detail
@@ -257,6 +260,8 @@ class OrganizationsDetailAPI(MethodView):
 
 @api.route("organizations/<org_uuid>/workforce_planning/")
 class WorkforcePlanningAPI(MethodView):
+    decorators = [authorized_org]
+
     @api.arguments(WorkforcePlanningQuerySchema, location="json")
     @api.response(200, WorkforcePlanningSchema)
     def post(self, workforce_planning, org_uuid):
