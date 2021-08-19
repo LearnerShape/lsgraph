@@ -50,3 +50,18 @@ def test_users_post(lsgraph_client, test_data_2org):
         "profile",
     ]:
         assert i in response.json.keys()
+
+
+def create_user(lsgraph_client, org_details):
+    """Create a new user"""
+    (customer_id, access_id, access_secret), org, _ = org_details
+    org_id = org["id"]
+    time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
+    user = {"name": f"user_{time}", "email": f"user_{time}@learnershape.com"}
+    response = lsgraph_client.post(
+        f"/api/v1/organizations/{org_id}/users/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+        json=user,
+    )
+    assert response.status_code == 200
+    return response.json

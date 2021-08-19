@@ -18,85 +18,219 @@ from datetime import datetime
 import pdb
 import pytest
 
+from .test_resource import create_resource
+from .test_user import create_user
 
-@pytest.mark.skip(reason="Not Implemented")
+
 def test_collections_get(lsgraph_client, test_data_2org):
     """Get collections list"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    response = lsgraph_client.get(
+        f"/api/v1/organizations/{org_id}/collections/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 200
+    assert "collections" in response.json.keys()
 
 
-@pytest.mark.skip(reason="Not Implemented")
 def test_collections_post(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Create collection"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
+    collection = {"name": f"collection_{time}", "public": False}
+    response = lsgraph_client.post(
+        f"/api/v1/organizations/{org_id}/collections/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+        json=collection,
+    )
+    assert response.status_code == 200
+    for i in ["id", "name", "public"]:
+        assert i in response.json.keys()
 
 
-def create_collection(
-    lsgraph_client, org_details, collection_name=None, resources=[], members=[]
-):
+def create_collection(lsgraph_client, org_details, collection_name=None, public=False):
     """Create a collection"""
     (customer_id, access_id, access_secret), org, collection = org_details
     org_id = org["id"]
     time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
     if not collection_name:
         collection_name = f"collection_{time}"
+    collection = {"name": collection_name, "public": public}
+    response = lsgraph_client.post(
+        f"/api/v1/organizations/{org_id}/collections/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+        json=collection,
+    )
+    assert response.status_code == 200
+    return response.json
 
 
-@pytest.mark.skip(reason="Not Implemented")
+def test_collections_get_detail(lsgraph_client, test_data_2org):
+    """Get collection detail"""
+    (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
+    customer_id, access_id, access_secret = c1
+    org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    response = lsgraph_client.get(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 200
+    for i in ["id", "name", "public"]:
+        assert i in response.json.keys()
+
+
 def test_collections_delete(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Delete collection"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    response = lsgraph_client.delete(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 204
 
 
-@pytest.mark.skip(reason="Not Implemented")
 def test_collections_get_resources(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Get collection resources list"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    response = lsgraph_client.get(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/resources/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 200
 
 
-@pytest.mark.skip(reason="Not Implemented")
 def test_collections_post_resources(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Add new resource to collection"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    org_resources = [
+        create_resource(lsgraph_client, test_data_2org[0]) for _ in range(10)
+    ]
+    resources = {"resources": [{"resource_id": i["id"]} for i in org_resources]}
+    response = lsgraph_client.post(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/resources/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+        json=resources,
+    )
+    assert response.status_code == 200
 
 
-@pytest.mark.skip(reason="Not Implemented")
+def add_resources(lsgraph_client, org_details, collection, resources=5):
+    """Add resources to a collection"""
+    (customer_id, access_id, access_secret), org, _ = org_details
+    org_id = org["id"]
+    collection_id = collection["id"]
+    if isinstance(resources, int):
+        resources = [
+            create_resource(lsgraph_client, org_details) for _ in range(resources)
+        ]
+    resources = {"resources": [{"resource_id": i["id"]} for i in resources]}
+    response = lsgraph_client.post(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/resources/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+        json=resources,
+    )
+    assert response.status_code == 200
+    return response.json
+
+
 def test_collections_delete_resources(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Delete collection resource"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    resources = add_resources(lsgraph_client, test_data_2org[0], collection)
+    resource_id = resources["resources"][0]["resource_id"]
+    response = lsgraph_client.delete(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/resources/{resource_id}/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 204
 
 
-@pytest.mark.skip(reason="Not Implemented")
 def test_collections_get_members(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Get collection members list"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    response = lsgraph_client.get(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/members/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 200
 
 
-@pytest.mark.skip(reason="Not Implemented")
 def test_collections_post_members(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Add members to collection"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    members = {"members": [{"user_id": i["id"]} for i in collection1["users"]]}
+    response = lsgraph_client.post(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/members/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+        json=members,
+    )
+    assert response.status_code == 200
 
 
-@pytest.mark.skip(reason="Not Implemented")
+def add_members(lsgraph_client, org_details, collection, members=5):
+    """Add resources to a collection"""
+    (customer_id, access_id, access_secret), org, _ = org_details
+    org_id = org["id"]
+    collection_id = collection["id"]
+    if isinstance(members, int):
+        users = [create_user(lsgraph_client, org_details) for _ in range(members)]
+        members = {"members": [{"user_id": i["id"], "edit": False} for i in users]}
+    response = lsgraph_client.post(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/members/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+        json=members,
+    )
+    assert response.status_code == 200
+    return response.json
+
+
 def test_collections_delete_members(lsgraph_client, test_data_2org):
-    """Get collections list"""
+    """Delete member from collection"""
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
     customer_id, access_id, access_secret = c1
     org_id = org1["id"]
+    collection = create_collection(lsgraph_client, test_data_2org[0])
+    collection_id = collection["id"]
+    members = add_members(lsgraph_client, test_data_2org[0], collection)
+    member_id = members["members"][0]["user_id"]
+    response = lsgraph_client.delete(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/members/{member_id}/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 204
+    get_members = lsgraph_client.get(
+        f"/api/v1/organizations/{org_id}/collections/{collection_id}/members/",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    remaining_members = [i["user_id"] for i in get_members.json["members"]]
+    assert member_id not in remaining_members

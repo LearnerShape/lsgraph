@@ -26,13 +26,13 @@ class CollectionResourceSchema(OrderedBaseSchema):
 class CollectionMemberSchema(OrderedBaseSchema):
     user_id = fields.UUID()
     group_id = fields.UUID()
-    edit = fields.Boolean()
+    edit = fields.Boolean(default=False, missing=False)
 
 
 class CollectionSchema(OrderedBaseSchema):
     id = fields.UUID()
     name = fields.String()
-    public = fields.Boolean()
+    public = fields.Boolean(default=False, missing=False)
 
 
 class CollectionManySchema(OrderedBaseSchema):

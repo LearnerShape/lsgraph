@@ -34,3 +34,6 @@ class Collection(db.Model):
     )
     name = db.Column(db.String(512))
     public = db.Column(db.Boolean)
+    organization_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("organization.id"), index=True
+    )
