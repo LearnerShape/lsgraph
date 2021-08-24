@@ -144,7 +144,9 @@ def update_members(member_data, org_uuid, collection_uuid):
                 m.edit = i["edit"]
             else:
                 m = models.CollectionMember(
-                    collection_id=collection_uuid, group_id=i["user_id"], edit=i["edit"]
+                    collection_id=collection_uuid,
+                    group_id=i["group_id"],
+                    edit=i["edit"],
                 )
         db.session.add(m)
         to_return.append(m)
