@@ -18,6 +18,8 @@ from datetime import datetime
 import pdb
 import pytest
 
+from .shared import create_platform
+
 
 def test_platforms_get(lsgraph_client, test_data_2org):
     """Get platform list"""
@@ -30,23 +32,6 @@ def test_platforms_get(lsgraph_client, test_data_2org):
     )
     assert response.status_code == 200
     assert "platforms" in response.json.keys()
-
-
-def create_platform(lsgraph_client, org_details, platform_name=None):
-    """Create a platform"""
-    (customer_id, access_id, access_secret), org, collection = org_details
-    org_id = org["id"]
-    time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
-    if not platform_name:
-        platform_name = f"platform_{time}"
-    platform = {"name": platform_name, "description": f"{platform_name}: description"}
-    response = lsgraph_client.post(
-        f"/api/v1/organizations/{org_id}/platforms/",
-        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
-        json=platform,
-    )
-    assert response.status_code == 200
-    return response.json
 
 
 def test_platforms_post(lsgraph_client, test_data_2org):

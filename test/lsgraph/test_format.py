@@ -18,6 +18,8 @@ from datetime import datetime
 import pdb
 import pytest
 
+from .shared import create_format
+
 
 def test_formats_get(lsgraph_client, test_data_2org):
     """Get format list"""
@@ -30,23 +32,6 @@ def test_formats_get(lsgraph_client, test_data_2org):
     )
     assert response.status_code == 200
     assert "formats" in response.json.keys()
-
-
-def create_format(lsgraph_client, org_details, format_name=None):
-    """Create a format"""
-    (customer_id, access_id, access_secret), org, collection = org_details
-    org_id = org["id"]
-    time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
-    if not format_name:
-        format_name = f"format_{time}"
-    format = {"name": format_name, "description": f"{format_name}: description"}
-    response = lsgraph_client.post(
-        f"/api/v1/organizations/{org_id}/formats/",
-        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
-        json=format,
-    )
-    assert response.status_code == 200
-    return response.json
 
 
 def test_formats_post(lsgraph_client, test_data_2org):

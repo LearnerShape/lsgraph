@@ -18,6 +18,7 @@ from flask.views import MethodView
 from flask import g
 from flask_smorest import abort
 from marshmallow import ValidationError
+from sqlalchemy import or_, and_
 import pdb
 
 from lsgraph import models
@@ -212,6 +213,37 @@ def create_new_offering(offering_data, org_uuid, resource_uuid):
     return prepare_offering(new_offering, {format.id: format})
 
 
+def apply_user_to_query(db_query, query_data, org_uuid):
+    if "user" in query_data:
+        user_id = query_data["user"]
+        # Check user is part of organization
+        if (
+            models.User.query.filter_by(id=user_id, organization_id=org_uuid).count()
+            != 1
+        ):
+            abort(403)
+        return db_query.filter(
+            or_(
+                models.CollectionMember.user_id == user_id,
+                and_(
+                    models.GroupMember.user_id == user_id,
+                    models.GroupMember.group_id == models.CollectionMember.group_id,
+                ),
+            ),
+            models.CollectionMember.collection_id
+            == models.CollectionResource.collection_id,
+            models.CollectionResource.resource_id == models.Resource.id,
+        )
+    return db_query.filter_by(organization_id=org_uuid)
+
+
+def apply_search_to_query(db_query, query_data, org_uuid):
+    if "query" in query_data:
+        query = query_data["query"]
+        return db_query.filter(models.Resource.__ts_vector__.match(query))
+    return db_query
+
+
 @api.route("organizations/<org_uuid>/resources/")
 class ResourcesAPI(MethodView):
     decorators = [authorized_org]
@@ -224,7 +256,10 @@ class ResourcesAPI(MethodView):
         Get a list of all resources for an organization
 
         """
-        resources = models.Resource.query.filter_by(organization_id=org_uuid).all()
+        resources = models.Resource.query
+        resources = apply_user_to_query(resources, query_data, org_uuid)
+        resources = apply_search_to_query(resources, query_data, org_uuid)
+        resources = resources.all()
         resources = get_resources(org_uuid, resources)
         return {"resources": resources}
 

@@ -18,6 +18,8 @@ from datetime import datetime
 import pdb
 import pytest
 
+from .shared import create_provider
+
 
 def test_providers_get(lsgraph_client, test_data_2org):
     """Get provider list"""
@@ -30,23 +32,6 @@ def test_providers_get(lsgraph_client, test_data_2org):
     )
     assert response.status_code == 200
     assert "providers" in response.json.keys()
-
-
-def create_provider(lsgraph_client, org_details, provider_name=None):
-    """Create a provider"""
-    (customer_id, access_id, access_secret), org, collection = org_details
-    org_id = org["id"]
-    time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
-    if not provider_name:
-        provider_name = f"provider_{time}"
-    provider = {"name": provider_name, "description": f"{provider_name}: description"}
-    response = lsgraph_client.post(
-        f"/api/v1/organizations/{org_id}/providers/",
-        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
-        json=provider,
-    )
-    assert response.status_code == 200
-    return response.json
 
 
 def test_providers_post(lsgraph_client, test_data_2org):

@@ -18,6 +18,8 @@ from datetime import datetime
 import pdb
 import pytest
 
+from .shared import create_group
+
 
 def test_groups_get(lsgraph_client, test_data_2org):
     """Get group list"""
@@ -97,26 +99,6 @@ def test_groups_outside_org_members(lsgraph_client, test_data_2org):
         json=group,
     )
     assert response.status_code == 403
-
-
-def create_group(lsgraph_client, org_details, group_name=None, members=[]):
-    """Create a group"""
-    (customer_id, access_id, access_secret), org, collection = org_details
-    org_id = org["id"]
-    time = datetime.now().strftime("%Y%M%d-%H%m%S-%f")
-    if not group_name:
-        group_name = f"group_{time}"
-    group = {
-        "name": group_name,
-        "members": members,
-    }
-    response = lsgraph_client.post(
-        f"/api/v1/organizations/{org_id}/groups/",
-        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
-        json=group,
-    )
-    assert response.status_code == 200
-    return response.json
 
 
 def test_groups_get_members(lsgraph_client, test_data_2org):

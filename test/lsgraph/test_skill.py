@@ -16,6 +16,8 @@
 import pdb
 import pytest
 
+from .shared import create_skills
+
 
 def test_skill_get(lsgraph_client, test_data_2org):
     (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
