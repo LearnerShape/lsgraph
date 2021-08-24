@@ -164,6 +164,19 @@ def get_skill_details(skill_ids):
     return output
 
 
+def filter_by_query(all_skill_ids, query_data):
+    """Filter skill IDs by query"""
+    if "query" in query_data:
+        query = query_data["query"]
+        results = (
+            models.Skill.query.filter(models.Skill.id.in_(all_skill_ids))
+            .filter(models.Skill.__ts_vector__.match(query))
+            .all()
+        )
+        return [i.id for i in results]
+    return all_skill_ids
+
+
 @api.route("organizations/<org_uuid>/skills/")
 class SkillsAPI(MethodView):
     decorators = [authorized_org]
@@ -185,6 +198,7 @@ class SkillsAPI(MethodView):
         all_skill_ids = [
             root_skill.id,
         ] + descendants[root_skill.id]
+        all_skill_ids = filter_by_query(all_skill_ids, query_data)
         skill_output = get_skill_details(all_skill_ids)
         return {"skills": skill_output.values()}
 

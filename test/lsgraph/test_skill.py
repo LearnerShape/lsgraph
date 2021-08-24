@@ -32,8 +32,38 @@ def test_skill_get(lsgraph_client, test_data_2org):
     assert "skills" in response.json.keys()
     skills = response.json["skills"]
     assert len(skills) == 16
-    for i in ["name", "id"]:
+    for i in [
+        "id",
+        "name",
+        "description",
+        "path",
+        "personal",
+        "creator",
+        "child_skills",
+        "num_descendants",
+    ]:
         assert i in skills[0].keys()
+
+
+def test_skill_get_query(lsgraph_client, test_data_2org):
+    (c1, org1, collection1), (c2, org2, collection2) = test_data_2org
+    customer_id, access_id, access_secret = c1
+    org_id = org1["id"]
+    org_name = org1["name"]
+    # Create skills
+    skills = create_skills(
+        lsgraph_client, test_data_2org[0], skills=["apple", "pear", "apple banana"]
+    )
+    response = lsgraph_client.get(
+        f"/api/v1/organizations/{org_id}/skills/?query=apple",
+        headers={"X-API-Key": access_id, "X-Auth-Token": access_secret},
+    )
+    assert response.status_code == 200
+    assert "skills" in response.json.keys()
+    results = response.json["skills"]
+    assert len(results) == 2
+    for skill in results:
+        assert "apple" in skill["name"]
 
 
 def test_skill_post(lsgraph_client, test_data_2org):
