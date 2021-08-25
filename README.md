@@ -1,14 +1,13 @@
 # lsgraph
 
-**The public-api branch is in the early stages of development. Documentation, including this README, may not match code functionality**
 
-**The head of this branch may not be in a working state and changes breaking backwards compatibility are likely** 
+**In August 2021 a new iteration of lsgraph was released with improved functionality. Existing users of lsgraph should use the [version1 branch](https://github.com/LearnerShape/lsgraph/tree/version1)** 
 
 lsgraph was created with the aim of supporting reskilling and upskilling for both organisations and individuals, using machine learning and other data science methods. Over time, we plan to include in lsgraph a steadily increasing set of services for this purpose. 
 
-The update of lsgraph in this branch is intended to separate the services provided by lsgraph from the frontend web application created for and run at [learnershape.com](https://www.learnershape.com/).
+The update of lsgraph is intended to separate the services provided by lsgraph from the frontend web application created for and run at [learnershape.com](https://www.learnershape.com/).
 
-Functionality being added includes:
+Functionality added includes:
 * Skill creation and graph modification
 * Learning resource management
 * User management
