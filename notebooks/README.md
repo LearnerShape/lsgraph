@@ -11,5 +11,6 @@ These notebooks require jupyter to run. If you have Python installed running `pi
 * [Setting up graphs, organisations, profiles, and users](https://github.com/LearnerShape/lsgraph/blob/main/notebooks/setup.ipynb)
 * [Job recommendation](https://github.com/LearnerShape/lsgraph/blob/main/notebooks/job%20recommendation.ipynb)
 * [Workforce planning](https://github.com/LearnerShape/lsgraph/blob/main/notebooks/workforce%20planning.ipynb)
-* [Course recommendation](https://github.com/LearnerShape/lsgraph/blob/main/notebooks/course%20recommendation.ipynb)
+* [Learning resources](https://github.com/LearnerShape/lsgraph/blob/main/notebooks/learning%20resources.ipynb)
+
 
