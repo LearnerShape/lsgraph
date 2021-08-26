@@ -31,7 +31,7 @@ def upgrade():
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("email", sa.Text(), nullable=True),
         sa.Column("name", sa.Text(), nullable=True),
-        sa.Column("password_hash", sa.Binary(), nullable=True),
+        sa.Column("password_hash", sa.LargeBinary(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("id"),
     )
