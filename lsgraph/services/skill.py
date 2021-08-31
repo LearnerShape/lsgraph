@@ -16,6 +16,7 @@
 from celery import shared_task
 from collections import defaultdict
 import pdb
+import uuid
 
 from lsgraph import models
 from lsgraph.models import db
@@ -115,14 +116,16 @@ class SkillProcessor:
 def skill_embedding(skill_id):
     """Generate a new skill embedding"""
     # Get full path for skill
+    if isinstance(skill_id, str):
+        skill_id = uuid.UUID(skill_id)
     ancestors = get_ancestor_skills(skill_id)[skill_id]
     skill_chain = [
         skill_id,
     ]
-    skill_chain.extend(ancestors[:-1])
+    skill_chain.extend(ancestors)
     all_skills = models.Skill.query.filter(models.Skill.id.in_(skill_chain)).all()
     all_skills = {i.id: i for i in all_skills}
-    skill_path = ", ".join([all_skills[i].name for i in reversed(skill_chain)])
+    skill_path = ", ".join([all_skills[i].name for i in reversed(skill_chain[:-1])])
     # Compute embedding for skill path
     vector = SkillProcessor.process(
         [
