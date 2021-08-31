@@ -1,3 +1,4 @@
+celery
 flask
 sqlalchemy
 psycopg2
@@ -6,3 +7,10 @@ python-dateutil
 pytz
 bs4
 gunicorn
+flask-migrate 
+flask-sqlalchemy
+marshmallow
+flask-smorest
+Flask-CeleryExt
+tensorflow-hub>=0.11.0
+tensorflow>=2.4.1
