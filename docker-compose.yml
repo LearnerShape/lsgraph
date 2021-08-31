@@ -2,7 +2,10 @@ version: "3"
 
 services:
     lsgraph:
-        build: ./
+        build:
+          context: .
+          dockerfile: ./compose/web/Dockerfile
+        image: lsgraph_web
         expose:
           - "5000"
         ports:
@@ -36,7 +39,10 @@ services:
         - "15672:15672"
 
     lsworker:
-        build: ./
+        build:
+          context: .
+          dockerfile: ./compose/worker/Dockerfile
+        image: lsgraph_worker
         volumes:
           - "./:/app/app"
         env_file: .env
