@@ -205,7 +205,7 @@ class JobRecommendation:
         """Evaluate distance for multiple target skill profiles"""
         for i in profile_skills:
             self.profile_skills[i.profile_id][i.skill_id] = i.level
-        self.skills.update({i.id: i.skill_embedding for i in skills})
+        self.skills.update({i.id: np.array(i.skill_embedding) for i in skills})
         results = []
         for ts in target_profiles:
             results.append(self.job_by_distance(user_profile, ts))
