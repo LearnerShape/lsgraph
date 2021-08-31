@@ -13,8 +13,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from lsgraph import create_app, ext_celery
+import tensorflow_hub
 
-app = create_app()
-app.app_context().push()
-celery = ext_celery.celery
+module_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
+
+embed = tensorflow_hub.load(module_url)
+
+embed(["Test message"])
