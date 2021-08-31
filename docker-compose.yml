@@ -14,6 +14,7 @@ services:
         command: ./start.sh
         links:
           - lsdatabase
+          - lsbroker
 
     lsdatabase:
         image: postgres:12
@@ -25,6 +26,26 @@ services:
           - "5432"
         ports:
           - "5432:5432"
+
+    lsbroker:
+      image: rabbitmq:3.9-management
+      expose:
+        - "5672"
+      ports:
+        - "5672:5672"
+        - "15672:15672"
+
+    lsworker:
+        build: ./
+        volumes:
+          - "./:/app/app"
+        env_file: .env
+        working_dir: /app/app
+        command: ./start_celery_worker.sh
+        links:
+          - lsdatabase
+          - lsbroker
+
 
 
 volumes:

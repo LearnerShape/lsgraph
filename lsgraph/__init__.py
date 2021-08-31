@@ -17,9 +17,14 @@
 import os
 
 from flask import Flask
+from flask_celeryext import FlaskCeleryExt
 from flask_smorest import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
+from lsgraph.celery_utils import make_celery
+
+ext_celery = FlaskCeleryExt(create_celery_app=make_celery)
 
 
 def create_app(test_config=None):
@@ -48,6 +53,7 @@ def create_app(test_config=None):
 
     models.db.init_app(app)
     migrate = Migrate(app, models.db)
+    ext_celery.init_app(app)
 
     api = Api(
         app,
