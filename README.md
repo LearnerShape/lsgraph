@@ -1,5 +1,7 @@
 # lsgraph
 
+**The version1 branch is not actively developed and will only receive major bug fixes**
+
 lsgraph was created with the aim of supporting reskilling and upskilling for both organisations and individuals, using machine learning and other data science methods. Over time, we plan to include in lsgraph a steadily increasing set of services for this purpose. 
 
 lsgraph currently provides services to:
